@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api.routes import auth, users
+from app.api.routes import auth, users, suggestions
 from app.core.database import engine, Base
 
 app = FastAPI(title="FastAPI App", version="1.0.0")
@@ -22,3 +22,4 @@ async def init_db():
 # Include routers
 app.include_router(auth.router, prefix="/api", tags=["auth"])
 app.include_router(users.router, prefix="/api", tags=["users"])
+app.include_router(suggestions.router, prefix="/api", tags=["suggestions"])

@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String
+from sqlalchemy.orm import relationship
 from app.core.database import Base
 
 class User(Base):
@@ -9,3 +10,6 @@ class User(Base):
     email = Column(String, unique=True, index=True)
     full_name = Column(String)
     hashed_password = Column(String)
+    
+    # Add relationship to suggestions
+    suggestions = relationship("Suggestion", back_populates="user")
