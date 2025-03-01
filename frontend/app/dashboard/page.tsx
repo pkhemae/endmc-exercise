@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Settings, LogOut } from 'lucide-react';
+import { API_URL } from '@/config';
 
 interface User {
   username: string;
@@ -23,7 +24,7 @@ export default function Dashboard() {
       try {
         console.log('Fetching user data...');
         
-        const response = await fetch('http://localhost:8000/api/users/me', {
+        const response = await fetch(`${API_URL}/api/users/me`, {
             credentials: 'include',
             headers: {
               'Content-Type': 'application/json'
@@ -85,7 +86,7 @@ export default function Dashboard() {
 
   const handleLogout = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/auth/logout', {
+      const response = await fetch(`${API_URL}/api/auth/logout`, {
         method: 'POST',
         credentials: 'include',
       });

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { User, Mail, Lock, Loader2 } from 'lucide-react';
+import { API_URL } from '@/config';
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -37,7 +38,7 @@ export default function Register() {
     }
 
     try {
-      const response = await fetch('http://localhost:8000/api/register', {
+      const response = await fetch(`${API_URL}/api/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Mail, Lock, Loader2 } from 'lucide-react';
+import { API_URL } from '@/config';
 
 export default function Login() {
   const [identifier, setIdentifier] = useState('');
@@ -22,7 +23,7 @@ export default function Login() {
       formData.append('username', identifier);
       formData.append('password', password);
 
-      const response = await fetch('http://localhost:8000/api/auth/login', { 
+      const response = await fetch(`${API_URL}/api/auth/login`, { 
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
