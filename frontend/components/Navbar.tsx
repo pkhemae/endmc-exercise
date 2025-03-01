@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import { Settings, LogOut } from 'lucide-react';
+import { Settings, LogOut, MessageSquare } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 
 export default function Navbar() {
@@ -50,10 +50,13 @@ export default function Navbar() {
     <nav>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          <div className="flex-shrink-0">
-            <Link href="/" className="text-white font-bold text-xl">
-              EndMC
-            </Link>
+          <div className="flex items-center">
+            <div className="flex-shrink-0">
+              <Link href="/" className="text-white font-bold text-xl">
+                EndMC
+              </Link>
+            </div>
+            
           </div>
 
           {user ? (
@@ -103,6 +106,14 @@ export default function Navbar() {
                       Tableau de bord
                     </Link>
                     <Link
+                      href="/suggestions"
+                      className="flex items-center px-4 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-white transition-colors rounded-lg mx-2"
+                      role="menuitem"
+                    >
+                      <MessageSquare className="mr-3 h-4 w-4" />
+                      Suggestions
+                    </Link>
+                    <Link
                       href="/dashboard/settings"
                       className="flex items-center px-4 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-white transition-colors rounded-lg mx-2"
                       role="menuitem"
@@ -129,6 +140,12 @@ export default function Navbar() {
             </div>
           ) : (
             <div className="flex items-center space-x-4">
+              <Link
+                href="/suggestions"
+                className="px-4 py-2 text-sm font-medium text-gray-300 hover:text-white transition-colors"
+              >
+                Suggestions
+              </Link>
               <Link
                 href="/login"
                 className="px-4 py-2 text-sm font-medium text-white bg-orange-500 rounded-lg hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg shadow-md"

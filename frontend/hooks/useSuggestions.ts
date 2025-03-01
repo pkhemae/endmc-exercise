@@ -11,10 +11,42 @@ export function useSuggestions() {
   const fetchSuggestions = async (skip = 0, limit = 10) => {
     setIsLoading(true);
     setError(null);
-
+  
     try {
       const response = await fetch(
         `${API_URL}/api/suggestions?skip=${skip}&limit=${limit}`,
+        {
+          credentials: 'include', // Make sure this is set to include cookies
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Failed to fetch suggestions');
+      }
+  
+      const data: SuggestionList = await response.json();
+      setSuggestions(data.suggestions);
+      setTotalSuggestions(data.total);
+      return data;
+    } catch (err: any) {
+      setError(err.message || 'Failed to fetch suggestions');
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchUserSuggestions = async (userId: number, skip = 0, limit = 10) => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch(
+        `${API_URL}/api/suggestions/user/${userId}?skip=${skip}&limit=${limit}`,
         {
           credentials: 'include',
           headers: {
@@ -25,7 +57,7 @@ export function useSuggestions() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.detail || 'Failed to fetch suggestions');
+        throw new Error(errorData.detail || 'Failed to fetch user suggestions');
       }
 
       const data: SuggestionList = await response.json();
@@ -33,7 +65,7 @@ export function useSuggestions() {
       setTotalSuggestions(data.total);
       return data;
     } catch (err: any) {
-      setError(err.message || 'Failed to fetch suggestions');
+      setError(err.message || 'Failed to fetch user suggestions');
       return null;
     } finally {
       setIsLoading(false);
@@ -133,14 +165,42 @@ export function useSuggestions() {
     }
   };
 
+  const deleteSuggestion = async (suggestionId: number) => {
+    try {
+      const response = await fetch(`${API_URL}/api/suggestions/${suggestionId}`, {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Failed to delete suggestion');
+      }
+  
+      // Remove the suggestion from the local state
+      setSuggestions(prev => prev.filter(suggestion => suggestion.id !== suggestionId));
+      setTotalSuggestions(prev => prev - 1);
+      return true;
+    } catch (err: any) {
+      setError(err.message || 'Failed to delete suggestion');
+      return false;
+    }
+  };
+  
+  // Update the return statement to include deleteSuggestion
   return {
     suggestions,
     totalSuggestions,
     isLoading,
     error,
     fetchSuggestions,
+    fetchUserSuggestions, // Add this line
     createSuggestion,
     likeSuggestion,
-    dislikeSuggestion
+    dislikeSuggestion,
+    deleteSuggestion
   };
 }
