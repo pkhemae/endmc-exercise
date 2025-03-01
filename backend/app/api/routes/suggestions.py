@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, delete
@@ -11,15 +11,36 @@ from jose import JWTError, jwt
 from typing import List, Optional
 
 router = APIRouter()
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/login")
+# Fix the tokenUrl to match the one in auth.py
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
-async def get_current_user(token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_db)):
+# Add a new function to get token from cookie
+async def get_token_from_cookie(request: Request):
+    print("Cookies received:", request.cookies)
+    # Try different possible cookie names
+    token = request.cookies.get("token") or request.cookies.get("access_token")
+    print("Token from cookie:", token)
+    if not token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated"
+        )
+    return token
+
+# Modify get_current_user to use the cookie token
+async def get_current_user(
+    token: str = Depends(get_token_from_cookie),
+    db: AsyncSession = Depends(get_db)
+):
     try:
+        print("Attempting to decode token:", token[:10] + "...")
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
+        print("Extracted username:", username)
         if username is None:
             raise HTTPException(status_code=401, detail="Invalid authentication credentials")
-    except JWTError:
+    except JWTError as e:
+        print("JWT Error:", str(e))
         raise HTTPException(status_code=401, detail="Invalid authentication credentials")
     
     query = select(User).where(User.username == username)
@@ -27,8 +48,10 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: AsyncSession
     user = result.scalar_one_or_none()
     
     if user is None:
+        print("User not found for username:", username)
         raise HTTPException(status_code=404, detail="User not found")
-        
+    
+    print("Authentication successful for user:", user.username)
     return user
 
 @router.post("/suggestions", response_model=SuggestionResponse, status_code=status.HTTP_201_CREATED)

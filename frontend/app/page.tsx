@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import { useAuth } from '@/hooks/useAuth';
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 
 export default function Home() {
   const { getCurrentUser } = useAuth();
@@ -17,14 +18,21 @@ export default function Home() {
     show: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.2
+        delayChildren: 0.3,
+        staggerChildren: 0.15
       }
     }
   };
 
   const item = {
     hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0 }
+    show: { 
+      opacity: 1, 
+      y: 0,
+      transition: {
+        duration: 0.5
+      }
+    }
   };
 
   return (
@@ -37,6 +45,7 @@ export default function Home() {
           variants={container}
           initial="hidden"
           animate="show"
+          viewport={{ once: true }}
         >
           <div className="text-center">
             <motion.h1 
@@ -85,6 +94,26 @@ export default function Home() {
               >
                 Effectuer une suggestion
               </motion.a>
+            </motion.div>
+            
+            {/* Preview Image */}
+            <motion.div 
+              className="mt-16 max-w-4xl mx-auto"
+              variants={item}
+            >
+              <div className="relative">
+                <div className="absolute -inset-1 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg blur opacity-25"></div>
+                <div className="relative bg-[#2a2a2a] p-2 rounded-lg shadow-xl">
+                  <Image
+                    src="/preview.png"
+                    alt="Application Preview"
+                    width={1000}
+                    height={625}
+                    className="rounded shadow-lg w-full"
+                    priority
+                  />
+                </div>
+              </div>
             </motion.div>
           </div>
         </motion.div>
