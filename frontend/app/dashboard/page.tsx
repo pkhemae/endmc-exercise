@@ -1,56 +1,18 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Settings, LogOut } from 'lucide-react';
-import { API_URL } from '@/config';
-
-interface User {
-  username: string;
-  email: string;
-  full_name: string;
-}
+import { useAuth } from '@/hooks/useAuth';
 
 export default function Dashboard() {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const router = useRouter();
+  const { user, isLoading, logout, getCurrentUser } = useAuth();
 
   useEffect(() => {
-    async function fetchUserData() {
-      try {
-        console.log('Fetching user data...');
-        
-        const response = await fetch(`${API_URL}/api/users/me`, {
-            credentials: 'include',
-            headers: {
-              'Content-Type': 'application/json'
-            }
-          });
-        
-        console.log('Response status:', response.status);
-        
-        if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.detail || 'Failed to fetch user data');
-        }
-  
-        const userData = await response.json();
-        console.log('User data received:', userData);
-        setUser(userData);
-      } catch (error) {
-        console.error('Error fetching user data:', error);
-        setIsLoading(false);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-  
-    fetchUserData();
-  }, [router]);
+    getCurrentUser();
+  }, []);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -83,19 +45,6 @@ export default function Dashboard() {
       document.removeEventListener('keydown', handleEscKey);
     };
   }, [isProfileOpen]);
-
-  const handleLogout = async () => {
-    try {
-      const response = await fetch(`${API_URL}/api/auth/logout`, {
-        method: 'POST',
-        credentials: 'include',
-      });
-
-      router.push('/login');
-    } catch (error) {
-      console.error('Logout failed:', error);
-    }
-  };
 
   return (
     <div className="min-h-screen bg-[#1e1e1e]">
@@ -157,7 +106,7 @@ export default function Dashboard() {
                   <div className="py-1 border-t border-gray-700">
                     <div className="px-2">
                       <button
-                        onClick={handleLogout}
+                        onClick={logout}
                         className="flex w-full items-center px-4 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-white transition-colors rounded-lg group"
                         role="menuitem"
                       >

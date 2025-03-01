@@ -1,48 +1,31 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Mail, Lock, Loader2 } from 'lucide-react';
-import { API_URL } from '@/config';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function Login() {
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
+  const { isLoading, login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     setError('');
 
     try {
-      const formData = new URLSearchParams();
-      formData.append('username', identifier);
-      formData.append('password', password);
-
-      const response = await fetch(`${API_URL}/api/auth/login`, { 
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: formData,
-        credentials: 'include',
+      const success = await login({
+        username: identifier,
+        password: password
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.detail || 'Échec de connexion');
+      
+      if (!success) {
+        setError('Échec de connexion');
       }
-
-      router.push('/dashboard');
     } catch (err: any) {
       setError(err.message || 'Une erreur est survenue lors de la connexion');
-    } finally {
-      setIsLoading(false);
     }
   };
 

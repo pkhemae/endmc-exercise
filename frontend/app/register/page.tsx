@@ -1,10 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { User, Mail, Lock, Loader2 } from 'lucide-react';
-import { API_URL } from '@/config';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -15,8 +14,7 @@ export default function Register() {
     confirmPassword: '',
   });
   const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
+  const { isLoading, register } = useAuth();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -28,40 +26,22 @@ export default function Register() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     setError('');
 
     if (formData.password !== formData.confirmPassword) {
       setError('Les mots de passe ne correspondent pas');
-      setIsLoading(false);
       return;
     }
 
     try {
-      const response = await fetch(`${API_URL}/api/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          username: formData.username,
-          email: formData.email,
-          full_name: formData.full_name,
-          password: formData.password,
-        }),
+      await register({
+        username: formData.username,
+        email: formData.email,
+        full_name: formData.full_name,
+        password: formData.password,
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.detail || 'Échec de l\'inscription');
-      }
-
-      router.push('/login?registered=true');
     } catch (err: any) {
       setError(err.message || 'Une erreur est survenue lors de l\'inscription');
-    } finally {
-      setIsLoading(false);
     }
   };
 
