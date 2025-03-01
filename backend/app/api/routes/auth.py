@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from app.core.security import verify_password, create_access_token, get_password_hash
@@ -10,21 +11,26 @@ from app.models.user import User
 from datetime import timedelta
 
 router = APIRouter()
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/login")
 
-@router.post("/login", response_model=Token)
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
+
+@router.post("/login")
 async def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
     db: AsyncSession = Depends(get_db)
 ):
-    query = select(User).where(User.username == form_data.username)
+    if '@' in form_data.username:
+        query = select(User).where(User.email == form_data.username)
+    else:
+        query = select(User).where(User.username == form_data.username)
+    
     result = await db.execute(query)
     user = result.scalar_one_or_none()
 
     if not user or not verify_password(form_data.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
+            detail="Incorrect email/username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
     
@@ -32,11 +38,37 @@ async def login(
         data={"sub": user.username},
         expires_delta=timedelta(minutes=30)
     )
-    return {"access_token": access_token, "token_type": "bearer"}
+    
+    response = JSONResponse(
+        content={"access_token": access_token, "token_type": "bearer"}
+    )
+    
+    response.set_cookie(
+        key="token",
+        value=access_token,
+        httponly=True,
+        max_age=1800,
+        path="/",
+        samesite="lax",
+        secure=False
+    )
+    
+    return response
+
+@router.post("/logout")
+async def logout():
+    response = JSONResponse(content={"message": "Successfully logged out"})
+    response.delete_cookie(
+        key="token",
+        path="/",
+        httponly=True,
+        secure=False,
+        samesite="lax"
+    )
+    return response
 
 @router.post("/register", status_code=status.HTTP_201_CREATED)
 async def register(user_data: UserCreate, db: AsyncSession = Depends(get_db)):
-    # Check if username exists
     query = select(User).where(User.username == user_data.username)
     result = await db.execute(query)
     if result.scalar_one_or_none():
@@ -45,7 +77,6 @@ async def register(user_data: UserCreate, db: AsyncSession = Depends(get_db)):
             detail="Username already registered"
         )
     
-    # Check if email exists
     query = select(User).where(User.email == user_data.email)
     result = await db.execute(query)
     if result.scalar_one_or_none():
@@ -54,7 +85,6 @@ async def register(user_data: UserCreate, db: AsyncSession = Depends(get_db)):
             detail="Email already registered"
         )
     
-    # Create new user
     db_user = User(
         username=user_data.username,
         email=user_data.email,

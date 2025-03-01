@@ -1,25 +1,25 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api.routes import auth, users, suggestions
-from app.core.database import engine, Base
+from app.api.routes import router
 
-app = FastAPI(title="FastAPI App", version="1.0.0")
+app = FastAPI()
 
-# CORS middleware configuration
+# Add CORS middleware to allow frontend requests
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["http://localhost:3000"],  # Your frontend URL
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-@app.on_event("startup")
-async def init_db():
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+# Debug the router mounting
+print("Mounting API router at /api")
 
-# Include routers
-app.include_router(auth.router, prefix="/api", tags=["auth"])
-app.include_router(users.router, prefix="/api", tags=["users"])
-app.include_router(suggestions.router, prefix="/api", tags=["suggestions"])
+# Mount the router directly at /api without additional prefixes
+app.include_router(router, prefix="/api")
+
+# Add a debug endpoint to check if the server is running
+@app.get("/")
+async def root():
+    return {"message": "API is running"}
