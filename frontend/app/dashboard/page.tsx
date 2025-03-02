@@ -6,7 +6,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { useSuggestions } from '@/hooks/useSuggestions';
 import { Suggestion } from '@/types/suggestion';
 import SuggestionModal from '@/components/SuggestionModal';
-import SuggestionCard from '@/components/SuggestionCard';
+import UserSuggestionCard from '@/components/UserSuggestionCard';
+import { X, Plus } from 'lucide-react';
 
 export default function Dashboard() {
   const { getCurrentUser, user } = useAuth();
@@ -104,18 +105,16 @@ export default function Dashboard() {
 
   // Add delete suggestion handler
   const handleDeleteSuggestion = async (suggestionId: number) => {
-    if (window.confirm('Are you sure you want to delete this suggestion?')) {
-      try {
-        const success = await deleteSuggestion(suggestionId);
-        if (success) {
-          // Remove the suggestion from the state
-          setUserSuggestions(prev => prev.filter(s => s.id !== suggestionId));
-        } else {
-          console.error('Failed to delete suggestion');
-        }
-      } catch (err) {
-        console.error('Error deleting suggestion:', err);
+    try {
+      const success = await deleteSuggestion(suggestionId);
+      if (success) {
+        // Remove the suggestion from the state
+        setUserSuggestions(prev => prev.filter(s => s.id !== suggestionId));
+      } else {
+        console.error('Failed to delete suggestion');
       }
+    } catch (err) {
+      console.error('Error deleting suggestion:', err);
     }
   };
 
@@ -158,26 +157,17 @@ export default function Dashboard() {
       <Navbar />
       <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         <h1 className="text-2xl font-semibold text-white">Tableau de bord</h1>
-        <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          <div className="bg-[#252525] rounded-xl shadow-lg p-6 border border-gray-700">
-            <h2 className="text-lg font-medium text-white mb-4">Bienvenue sur EndMC</h2>
-            <p className="text-gray-300">kayako beme</p>
-          </div>
-        </div>
 
         <div className="mt-8">
-          <div className="flex items-center gap-3 mb-4">
-            <h2 className="text-xl font-semibold text-white">Mes suggestions</h2>
-            <button 
-              onClick={() => setIsModalOpen(true)}
-              className="text-orange-500 p-2 rounded-full transition-transform duration-300 hover:rotate-90"
-              aria-label="Ajouter une suggestion"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-            </button>
-          </div>
+          <button 
+            onClick={() => setIsModalOpen(true)}
+            className="inline-flex items-center gap-2 mb-4 bg-[#252525] rounded-xl px-4 py-2 hover:border-gray-600 border border-gray-700 active:scale-95 transform transition-transform duration-150"
+            aria-label="Ajouter une suggestion"
+          >
+            <span className="font-medium text-white text-base">Mes suggestions</span>
+            <Plus className="h-4 w-4 text-white/70" />
+          </button>
+          
           {isLoading ? (
             <div className="flex justify-center items-center h-40">
               <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-orange-500"></div>
@@ -189,23 +179,24 @@ export default function Dashboard() {
           ) : userSuggestions.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {userSuggestions.map((suggestion) => (
-                <SuggestionCard
+                <UserSuggestionCard
                   key={suggestion.id}
                   suggestion={suggestion}
                   onLike={handleLikeSuggestion}
                   onDislike={handleDislikeSuggestion}
                   onDelete={handleDeleteSuggestion}
                   onClick={(id) => {
-                    // You can add navigation or modal open logic here
                     console.log(`Clicked suggestion: ${id}`);
-                    // Example: router.push(`/suggestions/${id}`);
                   }}
                 />
               ))}
             </div>
           ) : (
-            <div className="bg-[#252525] rounded-xl p-8 text-center shadow-xl border border-gray-700/50">
-              <p className="text-gray-300">Aucune suggestion trouvée. Créez-en une avec le bouton +</p>
+            <div className="p-8 text-center">
+              <div className="flex flex-col items-center justify-center">
+                <X className="h-32 w-32 text-red-500 mb-4 stroke-[1.5]" />
+                <p className="text-gray-300">Vous n'avez pas encore crée de suggestion.</p>
+              </div>
             </div>
           )}
         </div>

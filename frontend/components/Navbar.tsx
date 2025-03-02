@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import { Settings, LogOut, MessageSquare } from 'lucide-react';
+import { Settings, LogOut, ArrowUpRight } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 
 export default function Navbar() {
@@ -110,7 +110,7 @@ export default function Navbar() {
                       className="flex items-center px-4 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-white transition-colors rounded-lg mx-2"
                       role="menuitem"
                     >
-                      <MessageSquare className="mr-3 h-4 w-4" />
+                      <ArrowUpRight className="mr-3 h-4 w-4" />
                       Suggestions
                     </Link>
                     <Link
