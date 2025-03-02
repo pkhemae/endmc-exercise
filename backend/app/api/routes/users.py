@@ -13,6 +13,7 @@ async def read_users_me(current_user: User = Depends(get_current_user)):
     print(f"Current user: {current_user.username}")
     print(f"Token present: True")
     return {
+        "id": current_user.id,  # Add this line to include the user ID
         "username": current_user.username,
         "email": current_user.email,
         "full_name": current_user.full_name
