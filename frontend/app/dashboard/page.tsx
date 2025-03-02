@@ -11,7 +11,7 @@ import { X, Plus } from 'lucide-react';
 
 export default function Dashboard() {
   const { getCurrentUser, user } = useAuth();
-  const { fetchSuggestions, likeSuggestion, dislikeSuggestion, deleteSuggestion, isLoading } = useSuggestions();
+  const { fetchUserSuggestions, likeSuggestion, dislikeSuggestion, deleteSuggestion, isLoading } = useSuggestions();
   const [userSuggestions, setUserSuggestions] = useState<Suggestion[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
@@ -22,24 +22,36 @@ export default function Dashboard() {
   const needsRefresh = useRef(false);
 
   useEffect(() => {
+    console.log('Dashboard: Auth effect running, getting current user');
     getCurrentUser();
   }, []);
 
   useEffect(() => {
-    if (!user) return;
+    console.log('Dashboard: User effect triggered', { user });
+    
+    // Make sure user exists and has an ID before making the API call
+    if (!user || typeof user.id !== 'number') {
+      console.log('Dashboard: User or user ID not available yet:', user);
+      return;
+    }
     
     const loadSuggestions = async () => {
       try {
         setIsRefreshing(true);
-        const allResult = await fetchSuggestions();
-        if (allResult) {
-          const filtered = allResult.suggestions.filter((s: Suggestion) => 
-            s.user_id === 2
-          );
-          setUserSuggestions(filtered);
+        console.log('Dashboard: Fetching suggestions for user ID:', user.id);
+        
+        // Use fetchUserSuggestions with the correct user ID
+        const result = await fetchUserSuggestions(user.id);
+        console.log('Dashboard: fetchUserSuggestions result:', result);
+        
+        if (result) {
+          console.log('Dashboard: Loaded user suggestions:', result.suggestions);
+          setUserSuggestions(result.suggestions);
+        } else {
+          console.log('Dashboard: No result from fetchUserSuggestions');
         }
       } catch (err) {
-        console.error('Erreur lors du chargement des suggestions:', err);
+        console.error('Dashboard: Erreur lors du chargement des suggestions:', err);
         setFetchError('Impossible de charger les suggestions');
       } finally {
         setIsRefreshing(false);
@@ -48,40 +60,21 @@ export default function Dashboard() {
 
     loadSuggestions();
     needsRefresh.current = false;
-  }, [user, isModalOpen, fetchSuggestions]);
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (openDropdownId !== null && 
-          dropdownRef.current[openDropdownId] && 
-          !dropdownRef.current[openDropdownId]?.contains(event.target as Node)) {
-        setOpenDropdownId(null);
-      }
-    }
-
-    if (openDropdownId !== null) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [openDropdownId]);
+  }, [user, isModalOpen]); // Remove fetchUserSuggestions from dependencies
 
   // Handle modal close with refresh
   const handleModalClose = () => {
     setIsModalOpen(false);
     
-    if (user) {
+    if (user && typeof user.id === 'number') { // Ensure user.id is a number
       const loadSuggestions = async () => {
         try {
-          console.log('Actualisation des suggestions après fermeture');
-          const allResult = await fetchSuggestions();
-          if (allResult) {
-            const filtered = allResult.suggestions.filter((s: Suggestion) => 
-              s.user_id === 2
-            );
-            setUserSuggestions(filtered);
+          console.log('Actualisation des suggestions après fermeture pour user ID:', user.id);
+          // Use fetchUserSuggestions with the correct user ID
+          const result = await fetchUserSuggestions(user.id);
+          if (result) {
+            console.log('Updated user suggestions:', result.suggestions);
+            setUserSuggestions(result.suggestions);
           }
         } catch (err) {
           console.error('Erreur lors du chargement des suggestions:', err);

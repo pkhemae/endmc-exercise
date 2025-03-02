@@ -33,8 +33,10 @@ export function useSuggestions() {
   const fetchUserSuggestions = async (userId: number, skip = 0, limit = 10) => {
     setIsLoading(true);
     setError(null);
-
+  
     try {
+      console.log(`Making request to: ${API_URL}/api/suggestions/user/${userId}?skip=${skip}&limit=${limit}`);
+      
       const response = await fetch(
         `${API_URL}/api/suggestions/user/${userId}?skip=${skip}&limit=${limit}`,
         {
@@ -44,18 +46,31 @@ export function useSuggestions() {
           }
         }
       );
-
+  
+      console.log('Response status:', response.status);
+      
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || 'Failed to fetch user suggestions');
+        const errorText = await response.text();
+        console.error('Error response:', errorText);
+        try {
+          const errorData = JSON.parse(errorText);
+          throw new Error(errorData.detail || 'Failed to fetch user suggestions');
+        } catch (e) {
+          throw new Error(`Failed to fetch user suggestions: ${errorText}`);
+        }
       }
-
-      const data: SuggestionList = await response.json();
-      setSuggestions(data.suggestions);
-      setTotalSuggestions(data.total);
+  
+      const data = await response.json();
+      console.log('Received user suggestions data:', data);
+      
+      // Update the local state with the user's suggestions
+      setSuggestions(data.suggestions || []);
+      setTotalSuggestions(data.total || 0);
+      
       return data;
-    } catch (err: any) {
-      setError(err.message || 'Failed to fetch user suggestions');
+    } catch (err) {
+      console.error('Error in fetchUserSuggestions:', err);
+      setError(err instanceof Error ? err.message : 'Failed to fetch user suggestions');
       return null;
     } finally {
       setIsLoading(false);
@@ -65,8 +80,10 @@ export function useSuggestions() {
   const createSuggestion = async (suggestionData: CreateSuggestionData) => {
     setIsLoading(true);
     setError(null);
-
+  
     try {
+      console.log('Creating suggestion with data:', suggestionData);
+      
       const response = await fetch(`${API_URL}/api/suggestions`, {
         method: 'POST',
         credentials: 'include',
@@ -75,18 +92,31 @@ export function useSuggestions() {
         },
         body: JSON.stringify(suggestionData)
       });
-
+  
+      console.log('Create suggestion response status:', response.status);
+      
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || 'Failed to create suggestion');
+        const errorText = await response.text();
+        console.error('Error response:', errorText);
+        try {
+          const errorData = JSON.parse(errorText);
+          throw new Error(errorData.detail || 'Failed to create suggestion');
+        } catch (e) {
+          throw new Error(`Failed to create suggestion: ${errorText}`);
+        }
       }
-
-      const newSuggestion: Suggestion = await response.json();
+  
+      const newSuggestion = await response.json();
+      console.log('New suggestion created:', newSuggestion);
+      
+      // Update the global suggestions state
       setSuggestions(prev => [newSuggestion, ...prev]);
       setTotalSuggestions(prev => prev + 1);
+      
       return newSuggestion;
-    } catch (err: any) {
-      setError(err.message || 'Failed to create suggestion');
+    } catch (err) {
+      console.error('Error in createSuggestion:', err);
+      setError(err instanceof Error ? err.message : 'Failed to create suggestion');
       return null;
     } finally {
       setIsLoading(false);

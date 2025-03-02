@@ -48,7 +48,7 @@ export function useAuth() {
     setError(null);
 
     try {
-      const response = await fetch(`${API_URL}/api/register`, {
+      const response = await fetch(`${API_URL}/api/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -99,17 +99,27 @@ export function useAuth() {
           'Content-Type': 'application/json'
         }
       });
-      
+
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.detail || 'Failed to fetch user data');
+        throw new Error('Failed to fetch user data');
       }
 
       const userData = await response.json();
-      setUser(userData);
+      console.log('User data received:', userData); // Add this log
+      
+      // Make sure we're setting the ID correctly
+      setUser({
+        id: userData.id, // Make sure the backend returns this
+        username: userData.username,
+        email: userData.email,
+        full_name: userData.full_name || ''
+      });
+      
       return userData;
-    } catch (err: any) {
-      setError(err.message || 'Failed to fetch user data');
+    } catch (err) {
+      console.error('Error fetching current user:', err);
+      setError('Failed to fetch user data');
+      setUser(null);
       return null;
     } finally {
       setIsLoading(false);

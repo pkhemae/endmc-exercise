@@ -11,7 +11,7 @@ export interface RegisterData {
 }
 
 export interface User {
-  id?: number;
+  id: number; // Change this from 'id?: number' to 'id: number'
   username: string;
   email: string;
   full_name: string;

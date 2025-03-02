@@ -66,10 +66,10 @@ export default function Navbar() {
                 <Link 
                   href="/suggestions" 
                   className={`relative px-3 py-2 text-sm font-medium transition-colors duration-200
-                    ${pathname === '/suggestions' ? 'text-white' : 'text-gray-300 hover:text-white'}`}
+                    ${pathname.startsWith('/suggestions') ? 'text-white' : 'text-gray-300 hover:text-white'}`}
                 >
                   Suggestions
-                  {pathname === '/suggestions' && (
+                  {pathname.startsWith('/suggestions') && (
                     <span className="absolute bottom-0 left-0 w-full h-0.5 bg-orange-500 transform transition-transform duration-300"></span>
                   )}
                 </Link>
@@ -198,7 +198,7 @@ export default function Navbar() {
               <Link
                 href="/suggestions"
                 className={`block px-3 py-2 rounded-md text-base font-medium ${
-                  pathname === '/suggestions'
+                  pathname.startsWith('/suggestions')
                     ? 'text-white bg-orange-500/10'
                     : 'text-gray-300 hover:text-white hover:bg-white/5'
                 }`}

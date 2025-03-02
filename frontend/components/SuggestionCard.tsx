@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { ThumbsUp, ThumbsDown, User } from 'lucide-react';
 import { Suggestion } from '@/types/suggestion';
 import { API_URL } from '@/config';
-import { useRouter } from 'next/navigation';
 
 interface SuggestionCardProps {
   suggestion: Suggestion;
@@ -57,34 +57,36 @@ export default function SuggestionCard({
 
   return (
     <div 
-      className="bg-[#252525] rounded-xl overflow-hidden shadow-xl transition-all duration-300 hover:scale-[1.02] hover:rotate-1 cursor-pointer h-full flex flex-col"
+      className="bg-[#252525] rounded-xl overflow-hidden shadow-xl transition-all duration-300 hover:bg-[#2a2a2a] cursor-pointer w-full"
       onClick={handleCardClick}
       role="article"
       aria-labelledby={`suggestion-title-${suggestion.id}`}
     >
-      <div className="p-4 sm:p-5 flex flex-col flex-grow">
-        <div className="flex flex-col sm:flex-row sm:items-start justify-between mb-3 gap-2">
+      <div className="p-4 flex flex-col">
+        <div className="flex items-start justify-between mb-2">
           <h3 
             id={`suggestion-title-${suggestion.id}`}
-            className="text-lg sm:text-xl font-semibold text-white/90 line-clamp-1"
+            className="text-lg font-semibold text-white/90"
           >
             {suggestion.title}
           </h3>
-          <div className="flex items-center gap-1 text-gray-400 text-xs sm:text-sm whitespace-nowrap">
-            <User className="h-3 w-3 sm:h-3.5 sm:w-3.5 flex-shrink-0" />
+          <div className="flex items-center gap-1 text-gray-400 text-xs ml-4">
+            <User className="h-3 w-3 flex-shrink-0" />
             <span className="truncate max-w-[120px]">{displayName}</span>
           </div>
         </div>
         
-        <p className="mt-1 text-gray-300 text-xs sm:text-sm line-clamp-3 flex-grow">
-          {suggestion.description}
-        </p>
+        <div className="flex-grow">
+          <p className="text-gray-300 text-sm line-clamp-2">
+            {suggestion.description}
+          </p>
+        </div>
         
-        <div className="mt-4 sm:mt-6 flex items-center justify-end">
-          <div className="flex items-center gap-1 sm:gap-2">
+        <div className="mt-2 flex justify-end">
+          <div className="flex items-center gap-2">
             <button
               onClick={handleLikeClick}
-              className={`flex items-center gap-1 sm:gap-1.5 p-1.5 sm:p-2 rounded-lg transition-all duration-200 ${
+              className={`flex items-center gap-1 p-1.5 rounded-lg transition-all duration-200 ${
                 suggestion.user_has_liked
                   ? 'bg-green-500/20 text-green-400'
                   : 'hover:bg-gray-700/50 text-gray-400 hover:text-gray-300'
@@ -92,12 +94,12 @@ export default function SuggestionCard({
               aria-label="Like suggestion"
               aria-pressed={suggestion.user_has_liked}
             >
-              <span className="text-xs sm:text-sm">{suggestion.likes_count}</span>
-              <ThumbsUp className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              <span className="text-xs">{suggestion.likes_count}</span>
+              <ThumbsUp className="h-3.5 w-3.5" />
             </button>
             <button
               onClick={handleDislikeClick}
-              className={`flex items-center gap-1 sm:gap-1.5 p-1.5 sm:p-2 rounded-lg transition-all duration-200 ${
+              className={`flex items-center gap-1 p-1.5 rounded-lg transition-all duration-200 ${
                 suggestion.user_has_disliked
                   ? 'bg-red-500/20 text-red-400'
                   : 'hover:bg-gray-700/50 text-gray-400 hover:text-gray-300'
@@ -105,8 +107,8 @@ export default function SuggestionCard({
               aria-label="Dislike suggestion"
               aria-pressed={suggestion.user_has_disliked}
             >
-              <span className="text-xs sm:text-sm">{suggestion.dislikes_count}</span>
-              <ThumbsDown className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              <span className="text-xs">{suggestion.dislikes_count}</span>
+              <ThumbsDown className="h-3.5 w-3.5" />
             </button>
           </div>
         </div>
