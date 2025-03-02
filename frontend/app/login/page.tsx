@@ -119,6 +119,12 @@ export default function Login() {
             S&apos;inscrire
           </Link>
         </div>
+        
+        <div className="text-center text-sm mt-4">
+          <Link href="/" className="font-medium text-gray-400 hover:text-gray-300">
+            ← Retour à l&apos;accueil
+          </Link>
+        </div>
       </div>
     </div>
   );

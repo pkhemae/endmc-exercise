@@ -195,9 +195,15 @@ export default function Register() {
         </form>
 
         <div className="text-center text-sm">
-        <span className="text-gray-400">Vous avez déjà un compte ?</span>{' '}
+          <span className="text-gray-400">Vous avez déjà un compte ?</span>{' '}
           <Link href="/login" className="font-medium text-orange-500 hover:text-orange-400">
             S&apos;identifier
+          </Link>
+        </div>
+        
+        <div className="text-center text-sm mt-4">
+          <Link href="/" className="font-medium text-gray-400 hover:text-gray-300">
+            ← Retour à l&apos;accueil
           </Link>
         </div>
       </div>
