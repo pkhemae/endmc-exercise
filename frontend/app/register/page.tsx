@@ -40,8 +40,9 @@ export default function Register() {
         full_name: formData.full_name,
         password: formData.password,
       });
-    } catch (err: any) {
-      setError(err.message || 'Une erreur est survenue lors de l\'inscription');
+    } catch (err: Error | unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Une erreur est survenue lors de l\'inscription';
+      setError(errorMessage);
     }
   };
 
@@ -71,7 +72,7 @@ export default function Register() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label htmlFor="username" className="block text-sm font-medium text-gray-300 mb-1">
-                Nom d'utilisateur
+                Nom d&apos;utilisateur
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -85,7 +86,7 @@ export default function Register() {
                   value={formData.username}
                   onChange={handleChange}
                   className="block w-full pl-10 px-4 py-3 bg-[#2e2e2e] border border-gray-700 rounded-md text-white placeholder:text-gray-500/50 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent [&:-webkit-autofill]:bg-[#2e2e2e] [&:-webkit-autofill]:text-white [&:-webkit-autofill]:shadow-[0_0_0_30px_#2e2e2e_inset] [&:-webkit-autofill]:[background-clip:content-box] [&:-webkit-autofill]:border-gray-700 [-webkit-text-fill-color:white]"
-                  placeholder="Nom d'utilisateur"
+                  placeholder="Nom d&apos;utilisateur"
                 />
               </div>
             </div>
@@ -187,16 +188,16 @@ export default function Register() {
                   Inscription...
                 </span>
               ) : (
-                'S\'inscrire'
+                'S&apos;inscrire'
               )}
             </button>
           </div>
         </form>
 
         <div className="text-center text-sm">
-          <span className="text-gray-400">Vous avez déjà un compte ? </span>{' '}
+        <span className="text-gray-400">Vous avez déjà un compte ?</span>{' '}
           <Link href="/login" className="font-medium text-orange-500 hover:text-orange-400">
-            Connexion
+            S&apos;identifier
           </Link>
         </div>
       </div>

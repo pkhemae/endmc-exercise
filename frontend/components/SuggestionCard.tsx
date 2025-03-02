@@ -16,7 +16,6 @@ export default function SuggestionCard({
   onDislike
 }: SuggestionCardProps) {
   const router = useRouter();
-  const [isExpanded, setIsExpanded] = useState(false);
   const [userName, setUserName] = useState<string | null>(null);
   
   useEffect(() => {
@@ -77,7 +76,7 @@ export default function SuggestionCard({
           </div>
         </div>
         
-        <p className={`mt-1 text-gray-300 text-sm ${isExpanded ? '' : 'line-clamp-3'}`}>
+        <p className="mt-1 text-gray-300 text-sm line-clamp-3">
           {suggestion.description}
         </p>
         

@@ -24,8 +24,9 @@ export default function Login() {
       if (!success) {
         setError('Échec de connexion');
       }
-    } catch (err: any) {
-      setError(err.message || 'Une erreur est survenue lors de la connexion');
+    } catch (err: Error | unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Une erreur est survenue lors de la connexion';
+      setError(errorMessage);
     }
   };
 
@@ -54,7 +55,7 @@ export default function Login() {
 
           <div>
             <label htmlFor="identifier" className="block text-sm font-medium text-gray-300 mb-1">
-              Email ou Nom d'utilisateur
+              Email ou Nom d&apos;utilisateur
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -113,9 +114,9 @@ export default function Login() {
         </form>
 
         <div className="text-center text-sm">
-          <span className="text-gray-400">Vous n'avez pas de compte ?</span>{' '}
+          <span className="text-gray-400">Vous n&apos;avez pas de compte ?</span>{' '}
           <Link href="/register" className="font-medium text-orange-500 hover:text-orange-400">
-            S'inscrire
+            S&apos;inscrire
           </Link>
         </div>
       </div>

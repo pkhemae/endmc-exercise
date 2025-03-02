@@ -11,7 +11,8 @@ export default function Home() {
 
   useEffect(() => {
     getCurrentUser();
-  }, []);
+  }, [getCurrentUser]);
+
   
   const container = {
     hidden: { opacity: 0 },
@@ -63,7 +64,7 @@ export default function Home() {
               className="text-5xl font-bold text-white sm:text-6xl md:text-7xl tracking-tight"
               variants={item}
             >
-              Apportez votre pierre à l'édifice.
+              Apportez votre pierre à l&apos;édifice.
             </motion.h1>
             
             <motion.div 

@@ -62,7 +62,7 @@ export default function DeleteSuggestionModal({
       >
         <div className="p-8">
           <p className="text-white text-center text-lg">
-            Êtes-vous sûr de vouloir supprimer la suggestion <span className="font-medium">"{suggestionTitle}"</span> ?
+            Êtes-vous sûr de vouloir supprimer la suggestion <span className="font-medium">&quot;{suggestionTitle}&quot;</span> ?
           </p>
         </div>
         

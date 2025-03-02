@@ -2,14 +2,13 @@ import { useState, useRef, useEffect } from 'react';
 import { ThumbsUp, ThumbsDown, Trash2, ChevronDown } from 'lucide-react';
 import { Suggestion } from '@/types/suggestion';
 import DeleteSuggestionModal from './DeleteSuggestionModal';
-import { useRouter } from 'next/navigation'; // Add this import
+import { useRouter } from 'next/navigation';
 
 interface UserSuggestionCardProps {
   suggestion: Suggestion;
   onLike: (id: number) => Promise<void>;
   onDislike: (id: number) => Promise<void>;
   onDelete: (id: number) => Promise<void>;
-  onClick?: (id: number) => void;
 }
 
 export default function UserSuggestionCard({
@@ -17,9 +16,8 @@ export default function UserSuggestionCard({
   onLike,
   onDislike,
   onDelete,
-  onClick
 }: UserSuggestionCardProps) {
-  const router = useRouter(); // Add this
+  const router = useRouter();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);

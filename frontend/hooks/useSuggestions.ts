@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { API_URL } from '@/config';
 import { Suggestion, SuggestionList, CreateSuggestionData } from '@/types/suggestion';
 
@@ -8,37 +8,27 @@ export function useSuggestions() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchSuggestions = async (skip = 0, limit = 10) => {
+  const fetchSuggestions = useCallback(async () => {
     setIsLoading(true);
-    setError(null);
-  
+    
     try {
-      const response = await fetch(
-        `${API_URL}/api/suggestions?skip=${skip}&limit=${limit}`,
-        {
-          credentials: 'include', // Make sure this is set to include cookies
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-  
+      const response = await fetch(`${API_URL}/api/suggestions`, {
+        credentials: 'include',
+      });
+      
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || 'Failed to fetch suggestions');
+        throw new Error('Failed to fetch suggestions');
       }
-  
-      const data: SuggestionList = await response.json();
-      setSuggestions(data.suggestions);
-      setTotalSuggestions(data.total);
+      
+      const data = await response.json();
       return data;
-    } catch (err: any) {
-      setError(err.message || 'Failed to fetch suggestions');
+    } catch (error) {
+      console.error('Error fetching suggestions:', error);
       return null;
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);  // Empty dependency array
 
   const fetchUserSuggestions = async (userId: number, skip = 0, limit = 10) => {
     setIsLoading(true);

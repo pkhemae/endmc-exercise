@@ -1,12 +1,9 @@
 'use client';
 
-// Add useAuth import
-import { useAuth } from '@/hooks/useAuth';
-
 import { useEffect, useState } from 'react';
 import { API_URL } from '@/config';
 import { Suggestion } from '@/types/suggestion';
-import { ThumbsUp, ThumbsDown, User, LogIn } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, User } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useParams } from 'next/navigation';
 import { useSuggestions } from '@/hooks/useSuggestions';
@@ -20,7 +17,6 @@ export default function SuggestionPage() {
   const [error, setError] = useState<string | null>(null);
   const { likeSuggestion, dislikeSuggestion } = useSuggestions();
   const [isActionLoading, setIsActionLoading] = useState(false);
-  const { user } = useAuth(); // Add this line
 
   useEffect(() => {
     const fetchSuggestion = async () => {
@@ -47,12 +43,9 @@ export default function SuggestionPage() {
     fetchSuggestion();
   }, [id]);
 
-  const handleAuthRequired = () => {
-    router.push('/login');
-  };
+  // Remove unused handleAuthRequired function
 
   const handleLike = async () => {
-    
     if (!suggestion || isActionLoading) return;
     
     setIsActionLoading(true);

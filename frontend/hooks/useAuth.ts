@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { API_URL } from '@/config';
 import { LoginCredentials, RegisterData, User } from '@/types';
@@ -88,7 +88,7 @@ export function useAuth() {
     }
   };
 
-  const getCurrentUser = async () => {
+  const getCurrentUser = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     
@@ -114,7 +114,7 @@ export function useAuth() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);  // Empty dependency array
 
   return {
     user,

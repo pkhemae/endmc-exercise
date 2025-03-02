@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { RefreshCw } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import { useSuggestions } from '@/hooks/useSuggestions';
@@ -18,28 +18,8 @@ export default function SuggestionsPage() {
   const [totalCount, setTotalCount] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
-    loadSuggestions();
-  }, []);
-
-  useEffect(() => {
-    filterSuggestions();
-  }, [searchTerm, allSuggestions]);
-
-  const filterSuggestions = () => {
-    if (searchTerm.trim() === '') {
-      setFilteredSuggestions(allSuggestions);
-      return;
-    }
-    
-    const filtered = allSuggestions.filter(suggestion => 
-      suggestion.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      suggestion.description.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    setFilteredSuggestions(filtered);
-  };
-
-  const loadSuggestions = async () => {
+  // Memoize the loadSuggestions function to prevent it from being recreated on each render
+  const loadSuggestions = useCallback(async () => {
     try {
       setRefreshing(true);
       const result = await fetchSuggestions();
@@ -54,7 +34,29 @@ export default function SuggestionsPage() {
     } finally {
       setRefreshing(false);
     }
-  };
+  }, [fetchSuggestions]);
+
+  // Memoize the filterSuggestions function
+  const filterSuggestions = useCallback(() => {
+    if (searchTerm.trim() === '') {
+      setFilteredSuggestions(allSuggestions);
+      return;
+    }
+    
+    const filtered = allSuggestions.filter(suggestion => 
+      suggestion.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      suggestion.description.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredSuggestions(filtered);
+  }, [searchTerm, allSuggestions]);
+
+  useEffect(() => {
+    loadSuggestions();
+  }, [loadSuggestions]);
+
+  useEffect(() => {
+    filterSuggestions();
+  }, [filterSuggestions]);
 
   const updateSuggestionInState = (suggestionId: number, updatedSuggestion: Suggestion) => {
     const updateFn = (prev: Suggestion[]) => 

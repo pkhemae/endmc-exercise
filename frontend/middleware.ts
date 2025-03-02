@@ -34,5 +34,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: [...protectedRoutes, ...authRoutes]
+  matcher: ['/dashboard', '/dashboard/profile', '/dashboard/settings', '/login', '/register']
 }

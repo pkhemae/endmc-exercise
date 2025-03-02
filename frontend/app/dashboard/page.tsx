@@ -11,7 +11,7 @@ import { X, Plus } from 'lucide-react';
 
 export default function Dashboard() {
   const { getCurrentUser, user } = useAuth();
-  const { fetchSuggestions, likeSuggestion, dislikeSuggestion, deleteSuggestion, isLoading, error } = useSuggestions();
+  const { fetchSuggestions, likeSuggestion, dislikeSuggestion, deleteSuggestion, isLoading } = useSuggestions();
   const [userSuggestions, setUserSuggestions] = useState<Suggestion[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
@@ -24,7 +24,7 @@ export default function Dashboard() {
   // Load user data once
   useEffect(() => {
     getCurrentUser();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Load suggestions when user changes or when modal closes
   useEffect(() => {
@@ -38,7 +38,7 @@ export default function Dashboard() {
         const allResult = await fetchSuggestions();
         if (allResult) {
           // Filter suggestions by user ID
-          const filtered = allResult.suggestions.filter(s => 
+          const filtered = allResult.suggestions.filter((s: Suggestion) => 
             s.user_id === 2 // Hardcoded to match your database
           );
           console.log("Filtered suggestions:", filtered);
@@ -55,7 +55,7 @@ export default function Dashboard() {
     
     // Reset the refresh flag
     needsRefresh.current = false;
-  }, [user, isModalOpen]); // Changed from needsRefresh.current to isModalOpen
+  }, [user, isModalOpen, fetchSuggestions]);
 
   // Add this effect after your other useEffects
   useEffect(() => {
@@ -88,7 +88,7 @@ export default function Dashboard() {
           const allResult = await fetchSuggestions();
           if (allResult) {
             // Filter suggestions by user ID
-            const filtered = allResult.suggestions.filter(s => 
+            const filtered = allResult.suggestions.filter((s: Suggestion) => 
               s.user_id === 2 // Hardcoded to match your database
             );
             setUserSuggestions(filtered);
@@ -102,12 +102,10 @@ export default function Dashboard() {
       loadSuggestions();
     }
   };
-
-  const [actionLoadingId, setActionLoadingId] = useState<number | null>(null);
   
   const handleDeleteSuggestion = async (suggestionId: number) => {
     try {
-      setActionLoadingId(suggestionId);
+      // Remove the actionLoadingId state since it's not being used in the UI
       const success = await deleteSuggestion(suggestionId);
       if (success) {
         setUserSuggestions(prev => prev.filter(s => s.id !== suggestionId));
@@ -116,8 +114,6 @@ export default function Dashboard() {
       }
     } catch (err) {
       console.error('Error deleting suggestion:', err);
-    } finally {
-      setActionLoadingId(null);
     }
   };
 
@@ -184,9 +180,6 @@ export default function Dashboard() {
                   onLike={handleLikeSuggestion}
                   onDislike={handleDislikeSuggestion}
                   onDelete={handleDeleteSuggestion}
-                  onClick={(id) => {
-                    console.log(`Clicked suggestion: ${id}`);
-                  }}
                 />
               ))}
             </div>
@@ -194,7 +187,7 @@ export default function Dashboard() {
             <div className="p-8 text-center">
               <div className="flex flex-col items-center justify-center">
                 <X className="h-32 w-32 text-red-500 mb-4 stroke-[1.5]" />
-                <p className="text-gray-300">Vous n'avez pas encore crée de suggestion.</p>
+                <p className="text-gray-300">Vous n&apos;avez pas encore crée de suggestion.</p>
               </div>
             </div>
           )}
