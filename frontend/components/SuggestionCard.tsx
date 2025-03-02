@@ -1,15 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { ThumbsUp, ThumbsDown, User, Loader2, ArrowUpRight } from 'lucide-react';
-import { Suggestion } from '@/types/suggestion';
 import { API_URL } from '@/config';
 import { motion } from 'framer-motion';
-
-interface SuggestionCardProps {
-  suggestion: Suggestion;
-  onLike: (id: number) => Promise<void>;
-  onDislike: (id: number) => Promise<void>;
-}
+import { SuggestionCardProps } from '@/types';
 
 export default function SuggestionCard({
   suggestion,

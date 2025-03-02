@@ -1,15 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { ThumbsUp, ThumbsDown, Trash2, ChevronDown } from 'lucide-react';
-import { Suggestion } from '@/types/suggestion';
 import DeleteSuggestionModal from './DeleteSuggestionModal';
 import { useRouter } from 'next/navigation';
-
-interface UserSuggestionCardProps {
-  suggestion: Suggestion;
-  onLike: (id: number) => Promise<void>;
-  onDislike: (id: number) => Promise<void>;
-  onDelete: (id: number) => Promise<void>;
-}
+import { UserSuggestionCardProps } from '@/types';
 
 export default function UserSuggestionCard({
   suggestion,

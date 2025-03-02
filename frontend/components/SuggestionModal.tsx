@@ -1,11 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useSuggestions } from '@/hooks/useSuggestions';
-
-interface SuggestionModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSuccess?: (success: boolean) => void;
-}
+import { SuggestionModalProps } from '@/types';
 
 export default function SuggestionModal({ isOpen, onClose, onSuccess }: SuggestionModalProps) {
   const [title, setTitle] = useState('');

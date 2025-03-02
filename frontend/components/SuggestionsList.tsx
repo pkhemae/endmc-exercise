@@ -1,13 +1,6 @@
-import { Suggestion } from '@/types/suggestion';
 import SuggestionCard from './SuggestionCard';
 import { motion } from 'framer-motion';
-
-interface SuggestionsListProps {
-  suggestions: Suggestion[];
-  totalCount: number;
-  onLike: (id: number) => Promise<void>;
-  onDislike: (id: number) => Promise<void>;
-}
+import { SuggestionsListProps } from '@/types';
 
 export default function SuggestionsList({ 
   suggestions,

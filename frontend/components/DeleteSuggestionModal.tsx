@@ -1,12 +1,6 @@
 import { X, Check } from 'lucide-react';
 import { useEffect, useRef } from 'react';
-
-interface DeleteSuggestionModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onConfirm: () => void;
-  suggestionTitle: string;
-}
+import { DeleteSuggestionModalProps } from '@/types';
 
 export default function DeleteSuggestionModal({
   isOpen,

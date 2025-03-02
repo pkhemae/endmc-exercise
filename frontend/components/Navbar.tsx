@@ -53,7 +53,6 @@ export default function Navbar() {
     <nav className="bg-[#1e1e1e] relative z-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Logo and Desktop Navigation */}
           <div className="flex items-center">
             <div className="flex-shrink-0">
               <Link href="/" className="text-white font-bold text-xl">
@@ -77,7 +76,6 @@ export default function Navbar() {
             </div>
           </div>
 
-          {/* Mobile menu button */}
           <div className="md:hidden flex items-center">
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -91,7 +89,6 @@ export default function Navbar() {
             </button>
           </div>
 
-          {/* Desktop Profile/Login */}
           <div className="hidden md:flex items-center">
             {user ? (
               <div className="relative" ref={dropdownRef}>
@@ -169,20 +166,17 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile menu - updated to overlay */}
       <div 
         className={`md:hidden fixed inset-0 z-20 transform transition-transform duration-300 ease-in-out ${
           isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
         <div className="relative h-full">
-          {/* Semi-transparent backdrop */}
           <div 
             className="absolute inset-0 bg-black/50 backdrop-blur-sm"
             onClick={() => setIsMobileMenuOpen(false)}
           ></div>
           
-          {/* Menu content */}
           <div className="absolute top-0 left-0 w-64 h-full bg-[#252525] shadow-lg overflow-y-auto">
             <div className="px-4 py-4 border-b border-gray-700 flex items-center justify-between">
               <span className="text-white font-medium">Menu</span>
