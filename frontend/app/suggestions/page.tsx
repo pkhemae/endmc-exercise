@@ -93,11 +93,11 @@ export default function SuggestionsPage() {
   return (
     <div className="min-h-screen bg-[#1e1e1e]">
       <Navbar />
-      <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-6">
-          <h1 className="text-2xl font-semibold text-white mb-4 md:mb-0">Suggestions</h1>
+      <main className="max-w-7xl mx-auto py-4 sm:py-6 px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col space-y-4 mb-6">
+          <h1 className="text-2xl font-semibold text-white">Suggestions</h1>
           
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
             <SearchBar 
               searchTerm={searchTerm}
               onSearchChange={setSearchTerm}
@@ -106,10 +106,11 @@ export default function SuggestionsPage() {
             <button 
               onClick={loadSuggestions}
               disabled={refreshing}
-              className="inline-flex items-center gap-2 bg-[#252525] rounded-xl px-4 py-2 hover:border-gray-600 border border-gray-700 active:scale-95 transform transition-transform duration-150"
+              className="inline-flex items-center justify-center gap-2 bg-[#252525] rounded-xl px-4 py-2 hover:border-gray-600 border border-gray-700 active:scale-95 transform transition-transform duration-150 sm:w-auto w-full"
               aria-label="Refresh suggestions"
             >
               <RefreshCw className={`h-5 w-5 text-white/70 ${refreshing ? 'animate-spin' : ''}`} />
+              <span className="sm:hidden">Refresh</span>
             </button>
           </div>
         </div>
