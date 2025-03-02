@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import Navbar from '@/components/Navbar';
 import { useAuth } from '@/hooks/useAuth';
 import { useSuggestions } from '@/hooks/useSuggestions';
@@ -15,71 +15,41 @@ export default function Dashboard() {
   const [userSuggestions, setUserSuggestions] = useState<Suggestion[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
-  const [openDropdownId, setOpenDropdownId] = useState<number | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const dropdownRef = useRef<{ [key: number]: HTMLDivElement | null }>({});
-  
-  const needsRefresh = useRef(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   useEffect(() => {
-    console.log('Dashboard: Auth effect running, getting current user');
     getCurrentUser();
-  }, []);
+  }, [getCurrentUser]);
 
   useEffect(() => {
-    console.log('Dashboard: User effect triggered', { user });
     
     if (!user || typeof user.id !== 'number') {
-      console.log('Dashboard: User or user ID not available yet:', user);
       return;
     }
     
     const loadSuggestions = async () => {
       try {
         setIsRefreshing(true);
-        console.log('Dashboard: Fetching suggestions for user ID:', user.id);
         
         const result = await fetchUserSuggestions(user.id);
-        console.log('Dashboard: fetchUserSuggestions result:', result);
         
         if (result) {
-          console.log('Dashboard: Loaded user suggestions:', result.suggestions);
           setUserSuggestions(result.suggestions);
         } else {
-          console.log('Dashboard: No result from fetchUserSuggestions');
         }
       } catch (err) {
-        console.error('Dashboard: Erreur lors du chargement des suggestions:', err);
-        setFetchError('Impossible de charger les suggestions');
       } finally {
         setIsRefreshing(false);
       }
     };
-
+  
     loadSuggestions();
-    needsRefresh.current = false;
-  }, [user, isModalOpen]);
-
+  }, [user?.id, refreshTrigger]); 
+  
   const handleModalClose = () => {
     setIsModalOpen(false);
-    
-    if (user && typeof user.id === 'number') {
-      const loadSuggestions = async () => {
-        try {
-          console.log('Actualisation des suggestions après fermeture pour user ID:', user.id);
-          const result = await fetchUserSuggestions(user.id);
-          if (result) {
-            console.log('Updated user suggestions:', result.suggestions);
-            setUserSuggestions(result.suggestions);
-          }
-        } catch (err) {
-          console.error('Erreur lors du chargement des suggestions:', err);
-          setFetchError('Impossible de charger les suggestions');
-        }
-      };
-      
-      loadSuggestions();
-    }
+    setRefreshTrigger(prev => prev + 1);
   };
   
   const handleDeleteSuggestion = async (suggestionId: number) => {

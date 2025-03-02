@@ -22,7 +22,6 @@ export default function Login() {
     setError('');
 
     try {
-      // Validate form data with Zod
       const validatedData = loginSchema.parse({ identifier, password });
       
       const success = await login({

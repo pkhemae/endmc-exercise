@@ -42,7 +42,7 @@ export default function SuggestionPage() {
             setIsLoading(false);
             return;
           }
-        } catch (authErr) {
+        } catch {  // Removed the unused '_' parameter
           console.log('going on public endpoint');
         }
         
