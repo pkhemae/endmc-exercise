@@ -9,6 +9,7 @@ from app.models.suggestion import Suggestion, suggestion_likes, suggestion_disli
 from app.schemas.suggestion import SuggestionCreate, SuggestionResponse, SuggestionList
 from jose import JWTError, jwt
 from typing import List, Optional
+from pydantic import BaseModel  # Add this import
 
 router = APIRouter()
 # Fix the tokenUrl to match the one in auth.py
@@ -75,17 +76,54 @@ async def create_suggestion(
         "title": db_suggestion.title,
         "description": db_suggestion.description,
         "user_id": db_suggestion.user_id,
+        "user_name": current_user.full_name or current_user.username,  # Add user name
         "likes_count": 0,
         "dislikes_count": 0,
         "user_has_liked": False,
         "user_has_disliked": False
     }
+# First, define the get_token_from_cookie_optional function
+async def get_token_from_cookie_optional(request: Request) -> Optional[str]:
+    return request.cookies.get("token") or request.cookies.get("access_token")
+
+# Then define the get_current_user_optional function that depends on it
+async def get_current_user_optional(
+    token: Optional[str] = Depends(get_token_from_cookie_optional),
+    db: AsyncSession = Depends(get_db)
+) -> Optional[User]:
+    if not token:
+        return None
+        
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            return None
+            
+        query = select(User).where(User.username == username)
+        result = await db.execute(query)
+        user = result.scalar_one_or_none()
+        return user
+    except JWTError:
+        return None
+
+# Add this to your response model
+class SuggestionResponse(BaseModel):
+    id: int
+    title: str
+    description: str
+    user_id: int
+    user_name: str  # Add this field
+    likes_count: int
+    dislikes_count: int
+    user_has_liked: bool
+    user_has_disliked: bool
 
 @router.get("/suggestions", response_model=SuggestionList)
 async def get_suggestions(
     skip: int = 0,
     limit: int = 10,
-    current_user: User = Depends(get_current_user),
+    current_user: Optional[User] = Depends(get_current_user_optional),
     db: AsyncSession = Depends(get_db)
 ):
     # Count total suggestions
@@ -93,28 +131,38 @@ async def get_suggestions(
     total_count = await db.execute(count_query)
     total = total_count.scalar_one()
     
-    # Get suggestions with pagination
-    query = select(Suggestion).offset(skip).limit(limit)
+    # Get suggestions with user information
+    query = (
+        select(Suggestion, User)
+        .join(User, Suggestion.user_id == User.id)
+        .offset(skip)
+        .limit(limit)
+    )
     result = await db.execute(query)
-    suggestions = result.scalars().all()
+    suggestions_with_users = result.all()
     
-    # Format response with like/dislike information
+    # Format response with like/dislike and user information
     response_suggestions = []
-    for suggestion in suggestions:
-        # Check if current user has liked or disliked
-        has_liked_query = select(suggestion_likes).where(
-            suggestion_likes.c.user_id == current_user.id,
-            suggestion_likes.c.suggestion_id == suggestion.id
-        )
-        has_liked_result = await db.execute(has_liked_query)
-        user_has_liked = has_liked_result.first() is not None
+    for suggestion, user in suggestions_with_users:
+        # Set default values for unauthenticated users
+        user_has_liked = False
+        user_has_disliked = False
         
-        has_disliked_query = select(suggestion_dislikes).where(
-            suggestion_dislikes.c.user_id == current_user.id,
-            suggestion_dislikes.c.suggestion_id == suggestion.id
-        )
-        has_disliked_result = await db.execute(has_disliked_query)
-        user_has_disliked = has_disliked_result.first() is not None
+        if current_user:
+            # Check if current user has liked or disliked
+            has_liked_query = select(suggestion_likes).where(
+                suggestion_likes.c.user_id == current_user.id,
+                suggestion_likes.c.suggestion_id == suggestion.id
+            )
+            has_liked_result = await db.execute(has_liked_query)
+            user_has_liked = has_liked_result.first() is not None
+            
+            has_disliked_query = select(suggestion_dislikes).where(
+                suggestion_dislikes.c.user_id == current_user.id,
+                suggestion_dislikes.c.suggestion_id == suggestion.id
+            )
+            has_disliked_result = await db.execute(has_disliked_query)
+            user_has_disliked = has_disliked_result.first() is not None
         
         # Count likes and dislikes
         likes_count_query = select(func.count()).select_from(suggestion_likes).where(
@@ -134,6 +182,7 @@ async def get_suggestions(
             "title": suggestion.title,
             "description": suggestion.description,
             "user_id": suggestion.user_id,
+            "user_name": user.full_name or user.username,  # Use full name if available, otherwise username
             "likes_count": likes_count,
             "dislikes_count": dislikes_count,
             "user_has_liked": user_has_liked,
@@ -142,18 +191,48 @@ async def get_suggestions(
     
     return {"suggestions": response_suggestions, "total": total}
 
-@router.get("/suggestions/{suggestion_id}", response_model=SuggestionResponse)
-async def get_suggestion(
+# Update the get_suggestion endpoint
+# Add this new endpoint for public access to a single suggestion
+@router.get("/suggestions/public/{suggestion_id}", response_model=SuggestionResponse)
+async def get_public_suggestion(
     suggestion_id: int,
-    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
-    query = select(Suggestion).where(Suggestion.id == suggestion_id)
+    # Join with User to get user information
+    query = select(Suggestion, User).join(User, Suggestion.user_id == User.id).where(Suggestion.id == suggestion_id)
     result = await db.execute(query)
-    suggestion = result.scalar_one_or_none()
+    suggestion_with_user = result.first()
     
-    if suggestion is None:
+    if suggestion_with_user is None:
         raise HTTPException(status_code=404, detail="Suggestion not found")
+    
+    suggestion, user = suggestion_with_user
+    
+    # Count likes and dislikes
+    likes_count_query = select(func.count()).select_from(suggestion_likes).where(
+        suggestion_likes.c.suggestion_id == suggestion.id
+    )
+    likes_count_result = await db.execute(likes_count_query)
+    likes_count = likes_count_result.scalar_one()
+    
+    dislikes_count_query = select(func.count()).select_from(suggestion_dislikes).where(
+        suggestion_dislikes.c.suggestion_id == suggestion.id
+    )
+    dislikes_count_result = await db.execute(dislikes_count_query)
+    dislikes_count = dislikes_count_result.scalar_one()
+    
+    # For public access, we set user_has_liked and user_has_disliked to False
+    return {
+        "id": suggestion.id,
+        "title": suggestion.title,
+        "description": suggestion.description,
+        "user_id": suggestion.user_id,
+        "user_name": user.full_name or user.username,
+        "likes_count": likes_count,
+        "dislikes_count": dislikes_count,
+        "user_has_liked": False,  # Default for anonymous users
+        "user_has_disliked": False  # Default for anonymous users
+    }
     
     # Check if current user has liked or disliked
     has_liked_query = select(suggestion_likes).where(
@@ -188,6 +267,7 @@ async def get_suggestion(
         "title": suggestion.title,
         "description": suggestion.description,
         "user_id": suggestion.user_id,
+        "user_name": user.full_name or user.username,  # Add user name
         "likes_count": likes_count,
         "dislikes_count": dislikes_count,
         "user_has_liked": user_has_liked,
@@ -254,6 +334,11 @@ async def like_suggestion(
     
     await db.commit()
     
+    # Get user information for the suggestion
+    user_query = select(User).where(User.id == suggestion.user_id)
+    user_result = await db.execute(user_query)
+    user = user_result.scalar_one_or_none()
+    
     # Count likes and dislikes after update
     likes_count_query = select(func.count()).select_from(suggestion_likes).where(
         suggestion_likes.c.suggestion_id == suggestion.id
@@ -272,6 +357,7 @@ async def like_suggestion(
         "title": suggestion.title,
         "description": suggestion.description,
         "user_id": suggestion.user_id,
+        "user_name": user.full_name or user.username,  # Add user name
         "likes_count": likes_count,
         "dislikes_count": dislikes_count,
         "user_has_liked": user_has_liked,
@@ -338,6 +424,10 @@ async def dislike_suggestion(
     
     await db.commit()
     
+    user_query = select(User).where(User.id == suggestion.user_id)
+    user_result = await db.execute(user_query)
+    user = user_result.scalar_one_or_none()
+
     # Count likes and dislikes after update
     likes_count_query = select(func.count()).select_from(suggestion_likes).where(
         suggestion_likes.c.suggestion_id == suggestion.id
@@ -356,6 +446,7 @@ async def dislike_suggestion(
         "title": suggestion.title,
         "description": suggestion.description,
         "user_id": suggestion.user_id,
+        "user_name": user.full_name or user.username,  # Add user name
         "likes_count": likes_count,
         "dislikes_count": dislikes_count,
         "user_has_liked": not already_liked if already_liked else False,
@@ -415,13 +506,13 @@ async def get_user_suggestions(
     total = total_count.scalar_one()
     
     # Get user's suggestions with pagination
-    query = select(Suggestion).where(Suggestion.user_id == user_id).offset(skip).limit(limit)
+    query = select(Suggestion, User).join(User, Suggestion.user_id == User.id).where(Suggestion.user_id == user_id).offset(skip).limit(limit)
     result = await db.execute(query)
-    suggestions = result.scalars().all()
+    suggestions_with_users = result.all()
     
     # Format response with like/dislike information
     response_suggestions = []
-    for suggestion in suggestions:
+    for suggestion, user in suggestions_with_users:
         # Check if current user has liked or disliked
         has_liked_query = select(suggestion_likes).where(
             suggestion_likes.c.user_id == current_user.id,
@@ -455,6 +546,7 @@ async def get_user_suggestions(
             "title": suggestion.title,
             "description": suggestion.description,
             "user_id": suggestion.user_id,
+            "user_name": user.full_name or user.username,  # Add user name
             "likes_count": likes_count,
             "dislikes_count": dislikes_count,
             "user_has_liked": user_has_liked,

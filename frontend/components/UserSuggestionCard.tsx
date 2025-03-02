@@ -89,7 +89,7 @@ export default function UserSuggestionCard({
   return (
     <>
       <div 
-        className="bg-[#252525] rounded-xl overflow-hidden shadow-xl hover:border-gray-600/50 transition-all duration-300 hover:scale-[1.02] hover:rotate-1 cursor-pointer border border-gray-700"
+        className="bg-[#252525] rounded-xl overflow-hidden shadow-xl transition-all duration-300 hover:scale-[1.02] hover:rotate-1 cursor-pointer"
         onClick={handleCardClick}
         role="article"
         aria-labelledby={`suggestion-title-${suggestion.id}`}

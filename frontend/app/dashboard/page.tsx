@@ -55,7 +55,7 @@ export default function Dashboard() {
     
     // Reset the refresh flag
     needsRefresh.current = false;
-  }, [user, needsRefresh.current]); // Only depend on user and the ref value
+  }, [user, isModalOpen]); // Changed from needsRefresh.current to isModalOpen
 
   // Add this effect after your other useEffects
   useEffect(() => {
@@ -104,20 +104,28 @@ export default function Dashboard() {
   };
 
   // Add delete suggestion handler
+  // Add these states
+  const [actionLoadingId, setActionLoadingId] = useState<number | null>(null);
+  
+  // Update your handlers
   const handleDeleteSuggestion = async (suggestionId: number) => {
     try {
+      setActionLoadingId(suggestionId);
       const success = await deleteSuggestion(suggestionId);
       if (success) {
-        // Remove the suggestion from the state
         setUserSuggestions(prev => prev.filter(s => s.id !== suggestionId));
       } else {
         console.error('Failed to delete suggestion');
       }
     } catch (err) {
       console.error('Error deleting suggestion:', err);
+    } finally {
+      setActionLoadingId(null);
     }
   };
 
+  // Similarly update handleLikeSuggestion and handleDislikeSuggestion
+  // Then pass actionLoadingId to your UserSuggestionCard component
   // Handle like suggestion
   const handleLikeSuggestion = async (suggestionId: number) => {
     try {
