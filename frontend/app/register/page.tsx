@@ -202,7 +202,7 @@ export default function Register() {
                   Inscription...
                 </span>
               ) : (
-                'S&apos;inscrire'
+                "S'inscrire"
               )}
             </button>
           </div>
