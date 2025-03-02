@@ -4,6 +4,12 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { Mail, Lock, Loader2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { z } from 'zod';
+
+const loginSchema = z.object({
+  identifier: z.string().min(1, 'Email ou nom d\'utilisateur requis'),
+  password: z.string().min(1, 'Mot de passe requis'),
+});
 
 export default function Login() {
   const [identifier, setIdentifier] = useState('');
@@ -16,15 +22,22 @@ export default function Login() {
     setError('');
 
     try {
+      // Validate form data with Zod
+      const validatedData = loginSchema.parse({ identifier, password });
+      
       const success = await login({
-        username: identifier,
-        password: password
+        username: validatedData.identifier,
+        password: validatedData.password
       });
       
       if (!success) {
         setError('Échec de connexion');
       }
-    } catch (err: Error | unknown) {
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        setError(err.errors[0].message);
+        return;
+      }
       const errorMessage = err instanceof Error ? err.message : 'Une erreur est survenue lors de la connexion';
       setError(errorMessage);
     }
