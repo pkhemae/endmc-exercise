@@ -6,7 +6,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useSuggestions } from '@/hooks/useSuggestions';
 import { Suggestion } from '@/types/suggestion';
 import SuggestionModal from '@/components/SuggestionModal';
-import { ThumbsUp, ThumbsDown, Trash2 } from 'lucide-react';
+import SuggestionCard from '@/components/SuggestionCard';
 
 export default function Dashboard() {
   const { getCurrentUser, user } = useAuth();
@@ -56,24 +56,24 @@ export default function Dashboard() {
     needsRefresh.current = false;
   }, [user, needsRefresh.current]); // Only depend on user and the ref value
 
-// Add this effect after your other useEffects
-useEffect(() => {
-  function handleClickOutside(event: MouseEvent) {
-    if (openDropdownId !== null && 
-        dropdownRef.current[openDropdownId] && 
-        !dropdownRef.current[openDropdownId]?.contains(event.target as Node)) {
-      setOpenDropdownId(null);
+  // Add this effect after your other useEffects
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (openDropdownId !== null && 
+          dropdownRef.current[openDropdownId] && 
+          !dropdownRef.current[openDropdownId]?.contains(event.target as Node)) {
+        setOpenDropdownId(null);
+      }
     }
-  }
 
-  if (openDropdownId !== null) {
-    document.addEventListener('mousedown', handleClickOutside);
-  }
+    if (openDropdownId !== null) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
 
-  return () => {
-    document.removeEventListener('mousedown', handleClickOutside);
-  };
-}, [openDropdownId]);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [openDropdownId]);
 
   // Handle modal close with refresh
   const handleModalClose = () => {
@@ -189,98 +189,18 @@ useEffect(() => {
           ) : userSuggestions.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {userSuggestions.map((suggestion) => (
-                <div 
-                  key={suggestion.id} 
-                  className="bg-[#252525] rounded-xl overflow-hidden shadow-xl border border-gray-700 hover:border-gray-600/50 transition-all duration-300"
-                >
-                  <div className="p-5">
-                    {/* Header */}
-                    <div className="flex items-start justify-between">
-                      <h3 className="text-xl font-semibold text-white/90 line-clamp-2">
-                        {suggestion.title}
-                      </h3>
-                      <div 
-                        className="relative"
-                        ref={el => dropdownRef.current[suggestion.id] = el}
-                      >
-                        <button
-                          onClick={() => setOpenDropdownId(openDropdownId === suggestion.id ? null : suggestion.id)}
-                          className="flex items-center p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200"
-                        >
-                          <svg 
-                            className={`h-5 w-5 transition-transform duration-200 ${
-                              openDropdownId === suggestion.id ? 'rotate-180' : ''
-                            }`}
-                            xmlns="http://www.w3.org/2000/svg" 
-                            viewBox="0 0 20 20" 
-                            fill="currentColor"
-                          >
-                            <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                          </svg>
-                        </button>
-                        
-                        {openDropdownId === suggestion.id && (
-                          <div 
-                            className="absolute right-0 mt-2 w-48 bg-[#252525] rounded-lg shadow-lg border border-gray-700 overflow-hidden z-20"
-                          >
-                            <button 
-                              onClick={() => {
-                                handleDeleteSuggestion(suggestion.id);
-                                setOpenDropdownId(null);
-                              }}
-                              className="w-full px-4 py-2.5 text-left text-sm text-red-400 hover:bg-white/10 flex items-center gap-2 transition-colors"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                              <span>Supprimer</span>
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  
-                    {/* Description */}
-                    <p className="mt-3 text-gray-300 text-sm line-clamp-3">
-                      {suggestion.description}
-                    </p>
-                    
-                    {/* Stats and Actions */}
-                    <div className="mt-6 flex items-center justify-between">
-                      <div className="flex items-center gap-4 text-sm">
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-gray-400">{suggestion.likes_count}</span>
-                          <span className="text-gray-500">likes</span>
-                        </div>
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-gray-400">{suggestion.dislikes_count}</span>
-                          <span className="text-gray-500">dislikes</span>
-                        </div>
-                      </div>
-                    
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => handleLikeSuggestion(suggestion.id)}
-                          className={`p-2 rounded-lg transition-all duration-200 ${
-                            suggestion.user_has_liked
-                              ? 'bg-green-500/20 text-green-400'
-                              : 'hover:bg-gray-700/50 text-gray-400 hover:text-gray-300'
-                          }`}
-                        >
-                          <ThumbsUp className="h-4 w-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDislikeSuggestion(suggestion.id)}
-                          className={`p-2 rounded-lg transition-all duration-200 ${
-                            suggestion.user_has_disliked
-                              ? 'bg-red-500/20 text-red-400'
-                              : 'hover:bg-gray-700/50 text-gray-400 hover:text-gray-300'
-                          }`}
-                        >
-                          <ThumbsDown className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <SuggestionCard
+                  key={suggestion.id}
+                  suggestion={suggestion}
+                  onLike={handleLikeSuggestion}
+                  onDislike={handleDislikeSuggestion}
+                  onDelete={handleDeleteSuggestion}
+                  onClick={(id) => {
+                    // You can add navigation or modal open logic here
+                    console.log(`Clicked suggestion: ${id}`);
+                    // Example: router.push(`/suggestions/${id}`);
+                  }}
+                />
               ))}
             </div>
           ) : (
