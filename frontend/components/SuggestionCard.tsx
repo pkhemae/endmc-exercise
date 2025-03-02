@@ -1,5 +1,5 @@
-import { useState, useRef } from 'react';
-import { ThumbsUp, ThumbsDown, Trash2, MoreVertical } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { ThumbsUp, ThumbsDown, Trash2, ChevronDown } from 'lucide-react';
 import { Suggestion } from '@/types/suggestion';
 
 interface SuggestionCardProps {
@@ -19,6 +19,35 @@ export default function SuggestionCard({
 }: SuggestionCardProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        isDropdownOpen &&
+        dropdownRef.current &&
+        buttonRef.current &&
+        !dropdownRef.current.contains(event.target as Node) &&
+        !buttonRef.current.contains(event.target as Node)
+      ) {
+        setIsDropdownOpen(false);
+      }
+    }
+
+    function handleEscKey(event: KeyboardEvent) {
+      if (isDropdownOpen && event.key === 'Escape') {
+        setIsDropdownOpen(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleEscKey);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscKey);
+    };
+  }, [isDropdownOpen]);
 
   const handleCardClick = () => {
     if (onClick) onClick(suggestion.id);
@@ -49,38 +78,36 @@ export default function SuggestionCard({
 
   return (
     <div 
-      className="bg-[#252525] rounded-xl overflow-hidden shadow-xl hover:border-gray-600/50 transition-all duration-300 hover:scale-[1.02] cursor-pointer"
+      className="bg-[#252525] rounded-xl overflow-hidden shadow-xl hover:border-gray-600/50 transition-all duration-300 hover:scale-[1.02] hover:rotate-1 cursor-pointer"
       onClick={handleCardClick}
       role="article"
       aria-labelledby={`suggestion-title-${suggestion.id}`}
     >
       <div className="p-5">
-        {/* Header */}
-        <div className="flex items-start justify-between">
-          <h3 
-            id={`suggestion-title-${suggestion.id}`}
-            className="text-xl font-semibold text-white/90 line-clamp-2 flex-1"
-          >
-            {suggestion.title}
-          </h3>
-          
+        <div className="flex items-start justify-between mb-3">
           <div 
-            className="relative ml-2"
-            ref={dropdownRef}
+            className="flex items-center gap-2 relative"
           >
             <button
+              ref={buttonRef}
               onClick={handleDropdownToggle}
-              className="p-1.5 rounded-full text-gray-400 hover:bg-white/10 hover:text-gray-300 transition-colors"
-              aria-label="Suggestion options"
+              className="flex items-center gap-2 hover:bg-white/10 px-3 py-1.5 rounded-lg active:scale-75 transform transition-transform duration-300"
               aria-expanded={isDropdownOpen}
               aria-haspopup="true"
             >
-              <MoreVertical className="h-5 w-5" />
+              <h3 
+                id={`suggestion-title-${suggestion.id}`}
+                className="text-xl font-semibold text-white/90 line-clamp-2"
+              >
+                {suggestion.title}
+              </h3>
+              <ChevronDown className={`h-5 w-5 text-gray-400 flex-shrink-0 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
             </button>
             
             {isDropdownOpen && (
               <div 
-                className="absolute right-0 mt-2 w-48 bg-[#252525] rounded-lg shadow-lg border border-gray-700 overflow-hidden z-20"
+                ref={dropdownRef}
+                className="absolute left-0 top-full mt-1 w-48 bg-[#252525] rounded-lg shadow-lg border border-gray-700 overflow-hidden z-20"
                 role="menu"
               >
                 <button 
@@ -97,27 +124,16 @@ export default function SuggestionCard({
         </div>
       
         {/* Description */}
-        <p className="mt-3 text-gray-300 text-sm line-clamp-3">
+        <p className="mt-1 text-gray-300 text-sm line-clamp-3 px-3">
           {suggestion.description}
         </p>
         
         {/* Stats and Actions */}
-        <div className="mt-6 flex items-center justify-between">
-          <div className="flex items-center gap-4 text-sm">
-            <div className="flex items-center gap-1.5">
-              <span className="text-gray-400">{suggestion.likes_count}</span>
-              <span className="text-gray-500">likes</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className="text-gray-400">{suggestion.dislikes_count}</span>
-              <span className="text-gray-500">dislikes</span>
-            </div>
-          </div>
-        
+        <div className="mt-6 flex items-center justify-end">
           <div className="flex items-center gap-2">
             <button
               onClick={handleLikeClick}
-              className={`p-2 rounded-lg transition-all duration-200 ${
+              className={`flex items-center gap-1.5 p-2 rounded-lg transition-all duration-200 ${
                 suggestion.user_has_liked
                   ? 'bg-green-500/20 text-green-400'
                   : 'hover:bg-gray-700/50 text-gray-400 hover:text-gray-300'
@@ -125,11 +141,12 @@ export default function SuggestionCard({
               aria-label="Like suggestion"
               aria-pressed={suggestion.user_has_liked}
             >
+              <span className="text-sm">{suggestion.likes_count}</span>
               <ThumbsUp className="h-4 w-4" />
             </button>
             <button
               onClick={handleDislikeClick}
-              className={`p-2 rounded-lg transition-all duration-200 ${
+              className={`flex items-center gap-1.5 p-2 rounded-lg transition-all duration-200 ${
                 suggestion.user_has_disliked
                   ? 'bg-red-500/20 text-red-400'
                   : 'hover:bg-gray-700/50 text-gray-400 hover:text-gray-300'
@@ -137,6 +154,7 @@ export default function SuggestionCard({
               aria-label="Dislike suggestion"
               aria-pressed={suggestion.user_has_disliked}
             >
+              <span className="text-sm">{suggestion.dislikes_count}</span>
               <ThumbsDown className="h-4 w-4" />
             </button>
           </div>

@@ -64,7 +64,7 @@ export default function Navbar() {
               {/* Existing profile button and dropdown */}
               <button
                 onClick={() => setIsProfileOpen(!isProfileOpen)}
-                className="flex items-center space-x-3 text-gray-300 hover:text-white hover:bg-white/10 active:scale-95 focus:outline-none rounded-xl p-2 transition-all duration-200"
+                className="flex items-center space-x-3 text-gray-300 hover:text-white hover:bg-white/10 active:scale-75 focus:outline-none rounded-xl p-2 transition-all duration-300"
               >
                 <div className="h-8 w-8 rounded-full bg-orange-500 flex items-center justify-center text-white">
                   <span className="text-sm font-medium">
