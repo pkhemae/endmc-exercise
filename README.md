@@ -34,18 +34,12 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-4. Set up your environment variables in `.env`:
-```env
-DATABASE_URL=sqlite:///./app.db
-SECRET_KEY=your_secret_key
-```
-
-5. Run database migrations:
+4. Run database migrations:
 ```bash
 alembic upgrade head
 ```
 
-6. Start the backend server:
+5. Start the backend server:
 ```bash
 uvicorn app.main:app --reload
 ```

@@ -13,14 +13,13 @@ async def read_users_me(current_user: User = Depends(get_current_user)):
     print(f"Current user: {current_user.username}")
     print(f"Token present: True")
     return {
-        "id": current_user.id,  # Add this line to include the user ID
+        "id": current_user.id,
         "username": current_user.username,
         "email": current_user.email,
         "full_name": current_user.full_name
     }
 
-# Fix the public endpoint route path
-@router.get("/public/{user_id}")  # Remove "users" from the path since we're already in the users router
+@router.get("/public/{user_id}")
 async def get_public_user_info(user_id: int, db: AsyncSession = Depends(get_db)):
     query = select(User).where(User.id == user_id)
     result = await db.execute(query)
@@ -29,7 +28,6 @@ async def get_public_user_info(user_id: int, db: AsyncSession = Depends(get_db))
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
     
-    # Return only public information
     return {
         "username": user.username,
         "full_name": user.full_name
@@ -41,16 +39,13 @@ async def get_user(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
-    # Query the user
     query = select(User).where(User.id == user_id)
     result = await db.execute(query)
     user = result.scalar_one_or_none()
     
-    # If user not found, raise 404
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
     
-    # Return user data
     return {
         "id": user.id,
         "username": user.username,

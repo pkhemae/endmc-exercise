@@ -29,7 +29,6 @@ export default function Dashboard() {
   useEffect(() => {
     console.log('Dashboard: User effect triggered', { user });
     
-    // Make sure user exists and has an ID before making the API call
     if (!user || typeof user.id !== 'number') {
       console.log('Dashboard: User or user ID not available yet:', user);
       return;
@@ -40,7 +39,6 @@ export default function Dashboard() {
         setIsRefreshing(true);
         console.log('Dashboard: Fetching suggestions for user ID:', user.id);
         
-        // Use fetchUserSuggestions with the correct user ID
         const result = await fetchUserSuggestions(user.id);
         console.log('Dashboard: fetchUserSuggestions result:', result);
         
@@ -60,17 +58,15 @@ export default function Dashboard() {
 
     loadSuggestions();
     needsRefresh.current = false;
-  }, [user, isModalOpen]); // Remove fetchUserSuggestions from dependencies
+  }, [user, isModalOpen]);
 
-  // Handle modal close with refresh
   const handleModalClose = () => {
     setIsModalOpen(false);
     
-    if (user && typeof user.id === 'number') { // Ensure user.id is a number
+    if (user && typeof user.id === 'number') {
       const loadSuggestions = async () => {
         try {
           console.log('Actualisation des suggestions après fermeture pour user ID:', user.id);
-          // Use fetchUserSuggestions with the correct user ID
           const result = await fetchUserSuggestions(user.id);
           if (result) {
             console.log('Updated user suggestions:', result.suggestions);

@@ -4,6 +4,18 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { User, Mail, Lock, Loader2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { z } from 'zod';
+
+const registerSchema = z.object({
+  username: z.string().min(3, 'Username must be at least 3 characters'),
+  email: z.string().email('Invalid email address'),
+  full_name: z.string().min(2, 'Full name must be at least 2 characters'),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
+  confirmPassword: z.string()
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
+});
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -28,19 +40,21 @@ export default function Register() {
     e.preventDefault();
     setError('');
 
-    if (formData.password !== formData.confirmPassword) {
-      setError('Les mots de passe ne correspondent pas');
-      return;
-    }
-
     try {
+      // Validate the form data
+      const validatedData = registerSchema.parse(formData);
+      
       await register({
-        username: formData.username,
-        email: formData.email,
-        full_name: formData.full_name,
-        password: formData.password,
+        username: validatedData.username,
+        email: validatedData.email,
+        full_name: validatedData.full_name,
+        password: validatedData.password,
       });
-    } catch (err: Error | unknown) {
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        setError(err.errors[0].message);
+        return;
+      }
       const errorMessage = err instanceof Error ? err.message : 'Une erreur est survenue lors de l\'inscription';
       setError(errorMessage);
     }

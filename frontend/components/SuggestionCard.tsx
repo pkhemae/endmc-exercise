@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { ThumbsUp, ThumbsDown, User } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, User, Loader2 } from 'lucide-react';
 import { Suggestion } from '@/types/suggestion';
 import { API_URL } from '@/config';
 
@@ -17,6 +17,7 @@ export default function SuggestionCard({
 }: SuggestionCardProps) {
   const router = useRouter();
   const [userName, setUserName] = useState<string | null>(null);
+  const [isLoadingUser, setIsLoadingUser] = useState(false);
   
   useEffect(() => {
     if (!suggestion.user_name && suggestion.user_id) {
@@ -26,6 +27,7 @@ export default function SuggestionCard({
   
   const fetchUserName = async (userId: number) => {
     try {
+      setIsLoadingUser(true);
       const response = await fetch(`${API_URL}/api/users/public/${userId}`, {
         credentials: 'include',
       });
@@ -36,22 +38,24 @@ export default function SuggestionCard({
       }
     } catch (error) {
       console.error('Error fetching user data:', error);
+    } finally {
+      setIsLoadingUser(false);
     }
   };
   
-  const handleCardClick = () => {
+  const handleCardClick = useCallback(() => {
     router.push(`/suggestions/${suggestion.id}`);
-  };
+  }, [router, suggestion.id]);
   
-  const handleLikeClick = (e: React.MouseEvent) => {
+  const handleLikeClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     onLike(suggestion.id);
-  };
+  }, [onLike, suggestion.id]);
 
-  const handleDislikeClick = (e: React.MouseEvent) => {
+  const handleDislikeClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     onDislike(suggestion.id);
-  };
+  }, [onDislike, suggestion.id]);
 
   const displayName = suggestion.user_name || userName || (suggestion.user_id ? `User #${suggestion.user_id}` : 'Unknown User');
 
@@ -72,7 +76,14 @@ export default function SuggestionCard({
           </h3>
           <div className="flex items-center gap-1 text-gray-400 text-xs ml-4">
             <User className="h-3 w-3 flex-shrink-0" />
-            <span className="truncate max-w-[120px]">{displayName}</span>
+            {isLoadingUser ? (
+              <span className="flex items-center">
+                <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                Loading...
+              </span>
+            ) : (
+              <span className="truncate max-w-[120px]">{displayName}</span>
+            )}
           </div>
         </div>
         

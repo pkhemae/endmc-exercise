@@ -1,5 +1,6 @@
 import { Suggestion } from '@/types/suggestion';
 import SuggestionCard from './SuggestionCard';
+import { motion } from 'framer-motion';
 
 interface SuggestionsListProps {
   suggestions: Suggestion[];
@@ -9,26 +10,51 @@ interface SuggestionsListProps {
 }
 
 export default function SuggestionsList({ 
-  suggestions, 
-  totalCount, 
+  suggestions,
   onLike, 
   onDislike 
 }: SuggestionsListProps) {
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        type: "spring",
+        stiffness: 100,
+        damping: 15
+      }
+    }
+  };
+
   return (
     <>
-      <p className="text-gray-400 mb-6">
-        Showing {suggestions.length} of {totalCount} suggestions
-      </p>
-      <div className="flex flex-col space-y-4">
+      <motion.div 
+        className="flex flex-col space-y-4"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
         {suggestions.map((suggestion) => (
-          <SuggestionCard
-            key={suggestion.id}
-            suggestion={suggestion}
-            onLike={onLike}
-            onDislike={onDislike}
-          />
+          <motion.div key={suggestion.id} variants={itemVariants}>
+            <SuggestionCard
+              suggestion={suggestion}
+              onLike={onLike}
+              onDislike={onDislike}
+            />
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
     </>
   );
 }

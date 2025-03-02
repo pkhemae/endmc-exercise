@@ -11,5 +11,4 @@ class User(Base):
     full_name = Column(String)
     hashed_password = Column(String)
     
-    # Add relationship to suggestions
     suggestions = relationship("Suggestion", back_populates="user")

@@ -8,6 +8,7 @@ import { Suggestion } from '@/types/suggestion';
 import SearchBar from '@/components/SearchBar';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import SuggestionsList from '@/components/SuggestionsList';
+import { motion } from 'framer-motion';
 
 export default function SuggestionsPage() {
   const { fetchSuggestions, likeSuggestion, dislikeSuggestion, isLoading } = useSuggestions();
@@ -17,6 +18,28 @@ export default function SuggestionsPage() {
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [totalCount, setTotalCount] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
+
+  // Animation variants
+  const pageVariants = {
+    hidden: { opacity: 0 },
+    visible: { 
+      opacity: 1,
+      transition: { 
+        duration: 0.5,
+        when: "beforeChildren",
+        staggerChildren: 0.2
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: { duration: 0.4 }
+    }
+  };
 
   const loadSuggestions = useCallback(async () => {
     try {
@@ -92,47 +115,77 @@ export default function SuggestionsPage() {
   return (
     <div className="min-h-screen bg-[#1e1e1e]">
       <Navbar />
-      <main className="max-w-7xl mx-auto py-4 sm:py-6 px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col space-y-4 mb-6">
-          <h1 className="text-2xl font-semibold text-white">Suggestions</h1>
+      <motion.main 
+        className="max-w-7xl mx-auto py-4 sm:py-6 px-4 sm:px-6 lg:px-8"
+        initial="hidden"
+        animate="visible"
+        variants={pageVariants}
+      >
+        <motion.div 
+          className="flex flex-col space-y-4 mb-6"
+          variants={itemVariants}
+        >
+          <motion.h1 
+            className="text-2xl font-semibold text-white"
+            variants={itemVariants}
+          >
+            Suggestions
+          </motion.h1>
           
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          <motion.div 
+            className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3"
+            variants={itemVariants}
+          >
             <SearchBar 
               searchTerm={searchTerm}
               onSearchChange={setSearchTerm}
             />
             
-            <button 
+            <motion.button 
               onClick={loadSuggestions}
               disabled={refreshing}
               className="inline-flex items-center justify-center gap-2 bg-[#252525] rounded-xl px-4 py-2 hover:border-gray-600 border border-gray-700 active:scale-95 transform transition-transform duration-150 sm:w-auto w-full"
               aria-label="Rafraîchir les suggestions"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
               <RefreshCw className={`h-5 w-5 text-white/70 ${refreshing ? 'animate-spin' : ''}`} />
               <span className="sm:hidden">Rafraîchir</span>
-            </button>
-          </div>
-        </div>
+            </motion.button>
+          </motion.div>
+        </motion.div>
 
-        {isLoading && !refreshing ? (
-          <LoadingSpinner />
-        ) : fetchError ? (
-          <div className="bg-red-900/20 rounded-lg p-4 text-red-400">
-            <p>Erreur : {fetchError}</p>
-          </div>
-        ) : filteredSuggestions.length > 0 ? (
-          <SuggestionsList
-            suggestions={filteredSuggestions}
-            totalCount={totalCount}
-            onLike={handleLikeSuggestion}
-            onDislike={handleDislikeSuggestion}
-          />
-        ) : (
-          <div className="p-8 text-center">
-            <p className="text-gray-300">Aucune suggestion trouvée.</p>
-          </div>
-        )}
-      </main>
+        <motion.div variants={itemVariants}>
+          {isLoading && !refreshing ? (
+            <LoadingSpinner />
+          ) : fetchError ? (
+            <motion.div 
+              className="bg-red-900/20 rounded-lg p-4 text-red-400"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <p>Erreur : {fetchError}</p>
+            </motion.div>
+          ) : filteredSuggestions.length > 0 ? (
+            <SuggestionsList
+              suggestions={filteredSuggestions}
+              totalCount={totalCount}
+              onLike={handleLikeSuggestion}
+              onDislike={handleDislikeSuggestion}
+            />
+          ) : (
+            <motion.div 
+              className="p-8 text-center"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5 }}
+            >
+              <p className="text-gray-300">Aucune suggestion trouvée.</p>
+            </motion.div>
+          )}
+        </motion.div>
+      </motion.main>
     </div>
   );
 }
