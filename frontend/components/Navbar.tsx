@@ -61,7 +61,6 @@ export default function Navbar() {
 
           {user ? (
             <div className="relative" ref={dropdownRef}>
-              {/* Existing profile button and dropdown */}
               <button
                 onClick={() => setIsProfileOpen(!isProfileOpen)}
                 className="flex items-center space-x-3 text-gray-300 hover:text-white hover:bg-white/10 active:scale-75 focus:outline-none rounded-xl p-2 transition-all duration-300"
@@ -112,14 +111,6 @@ export default function Navbar() {
                     >
                       <ArrowUpRight className="mr-3 h-4 w-4" />
                       Suggestions
-                    </Link>
-                    <Link
-                      href="/dashboard/settings"
-                      className="flex items-center px-4 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-white transition-colors rounded-lg mx-2"
-                      role="menuitem"
-                    >
-                      <Settings className="mr-3 h-4 w-4" />
-                      Paramètres
                     </Link>
                   </div>
                   

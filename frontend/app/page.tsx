@@ -12,14 +12,14 @@ export default function Home() {
   useEffect(() => {
     getCurrentUser();
   }, []);
-
+  
   const container = {
     hidden: { opacity: 0 },
     show: {
       opacity: 1,
       transition: {
         delayChildren: 0.3,
-        staggerChildren: 0.15
+        staggerChildren: 0.4
       }
     }
   };
@@ -31,6 +31,17 @@ export default function Home() {
       y: 0,
       transition: {
         duration: 0.5
+      }
+    }
+  };
+
+  const listContainer = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        delayChildren: 0.1,
+        staggerChildren: 0.15
       }
     }
   };
@@ -54,6 +65,7 @@ export default function Home() {
             >
               Apportez votre pierre à l'édifice.
             </motion.h1>
+            
             <motion.div 
               className="mt-8 space-y-4"
               variants={item}
@@ -66,9 +78,9 @@ export default function Home() {
               </motion.p>
               <motion.ul 
                 className="space-y-3"
-                variants={container}
+                variants={listContainer}
               >
-                {['Améliorer les services proposés', 'Rendre le discord plus attrayant', 'Faire caca au lit'].map((text, index) => (
+                {['Améliorer les services proposés', 'Rendre le discord plus attrayant', 'Faire caca au lit', 'Lécher les deux boules de glace'].map((text, index) => (
                   <motion.li 
                     key={index}
                     className="flex items-center justify-center text-gray-300"
@@ -82,6 +94,7 @@ export default function Home() {
                 ))}
               </motion.ul>
             </motion.div>
+            
             <motion.div 
               className="mt-8"
               variants={item}
@@ -96,7 +109,6 @@ export default function Home() {
               </motion.a>
             </motion.div>
             
-            {/* Preview Image */}
             <motion.div 
               className="mt-16 max-w-4xl mx-auto"
               variants={item}

@@ -54,9 +54,6 @@ export default function SuggestionCard({
     onDislike(suggestion.id);
   };
 
-  // Remove the toggleExpand function since we're navigating instead
-  
-  // Add back the displayName constant
   const displayName = suggestion.user_name || userName || (suggestion.user_id ? `User #${suggestion.user_id}` : 'Unknown User');
 
   return (

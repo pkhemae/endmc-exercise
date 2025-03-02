@@ -103,11 +103,8 @@ export default function Dashboard() {
     }
   };
 
-  // Add delete suggestion handler
-  // Add these states
   const [actionLoadingId, setActionLoadingId] = useState<number | null>(null);
   
-  // Update your handlers
   const handleDeleteSuggestion = async (suggestionId: number) => {
     try {
       setActionLoadingId(suggestionId);
@@ -124,14 +121,10 @@ export default function Dashboard() {
     }
   };
 
-  // Similarly update handleLikeSuggestion and handleDislikeSuggestion
-  // Then pass actionLoadingId to your UserSuggestionCard component
-  // Handle like suggestion
   const handleLikeSuggestion = async (suggestionId: number) => {
     try {
       const updatedSuggestion = await likeSuggestion(suggestionId);
       if (updatedSuggestion) {
-        // Update the suggestion in the state
         setUserSuggestions(prev => 
           prev.map(suggestion => 
             suggestion.id === suggestionId ? updatedSuggestion : suggestion
@@ -143,12 +136,10 @@ export default function Dashboard() {
     }
   };
 
-  // Handle dislike suggestion
   const handleDislikeSuggestion = async (suggestionId: number) => {
     try {
       const updatedSuggestion = await dislikeSuggestion(suggestionId);
       if (updatedSuggestion) {
-        // Update the suggestion in the state
         setUserSuggestions(prev => 
           prev.map(suggestion => 
             suggestion.id === suggestionId ? updatedSuggestion : suggestion

@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { ThumbsUp, ThumbsDown, Trash2, ChevronDown } from 'lucide-react';
 import { Suggestion } from '@/types/suggestion';
 import DeleteSuggestionModal from './DeleteSuggestionModal';
+import { useRouter } from 'next/navigation'; // Add this import
 
 interface UserSuggestionCardProps {
   suggestion: Suggestion;
@@ -18,6 +19,7 @@ export default function UserSuggestionCard({
   onDelete,
   onClick
 }: UserSuggestionCardProps) {
+  const router = useRouter(); // Add this
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -52,7 +54,7 @@ export default function UserSuggestionCard({
   }, [isDropdownOpen]);
 
   const handleCardClick = () => {
-    if (onClick) onClick(suggestion.id);
+    router.push(`/suggestions/${suggestion.id}`);
   };
 
   const handleDropdownToggle = (e: React.MouseEvent) => {
