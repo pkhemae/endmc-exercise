@@ -114,7 +114,7 @@ export function useAuth() {
     } finally {
       setIsLoading(false);
     }
-  }, []);  // Empty dependency array
+  }, []);
 
   return {
     user,

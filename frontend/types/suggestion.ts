@@ -3,7 +3,7 @@ export interface Suggestion {
   title: string;
   description: string;
   user_id: number;
-  user_name: string;  // Add this field
+  user_name: string;
   likes_count: number;
   dislikes_count: number;
   user_has_liked: boolean;

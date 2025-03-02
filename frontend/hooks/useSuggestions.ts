@@ -28,7 +28,7 @@ export function useSuggestions() {
     } finally {
       setIsLoading(false);
     }
-  }, []);  // Empty dependency array
+  }, []);
 
   const fetchUserSuggestions = async (userId: number, skip = 0, limit = 10) => {
     setIsLoading(true);

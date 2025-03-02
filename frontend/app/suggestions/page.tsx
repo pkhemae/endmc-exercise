@@ -18,7 +18,6 @@ export default function SuggestionsPage() {
   const [totalCount, setTotalCount] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
 
-  // Memoize the loadSuggestions function to prevent it from being recreated on each render
   const loadSuggestions = useCallback(async () => {
     try {
       setRefreshing(true);
@@ -29,8 +28,8 @@ export default function SuggestionsPage() {
         setTotalCount(result.total);
       }
     } catch (err) {
-      console.error("Error fetching suggestions:", err);
-      setFetchError("Failed to fetch suggestions");
+      console.error('Erreur lors du chargement des suggestions:', err);
+      setFetchError('Impossible de charger les suggestions');
     } finally {
       setRefreshing(false);
     }
@@ -75,7 +74,7 @@ export default function SuggestionsPage() {
         updateSuggestionInState(suggestionId, updatedSuggestion);
       }
     } catch (err) {
-      console.error('Error liking suggestion:', err);
+      console.error('Erreur lors du like de la suggestion:', err);
     }
   };
 
@@ -86,7 +85,7 @@ export default function SuggestionsPage() {
         updateSuggestionInState(suggestionId, updatedSuggestion);
       }
     } catch (err) {
-      console.error('Error disliking suggestion:', err);
+      console.error('Erreur lors du dislike de la suggestion:', err);
     }
   };
 
@@ -107,10 +106,10 @@ export default function SuggestionsPage() {
               onClick={loadSuggestions}
               disabled={refreshing}
               className="inline-flex items-center justify-center gap-2 bg-[#252525] rounded-xl px-4 py-2 hover:border-gray-600 border border-gray-700 active:scale-95 transform transition-transform duration-150 sm:w-auto w-full"
-              aria-label="Refresh suggestions"
+              aria-label="Rafraîchir les suggestions"
             >
               <RefreshCw className={`h-5 w-5 text-white/70 ${refreshing ? 'animate-spin' : ''}`} />
-              <span className="sm:hidden">Refresh</span>
+              <span className="sm:hidden">Rafraîchir</span>
             </button>
           </div>
         </div>
@@ -119,7 +118,7 @@ export default function SuggestionsPage() {
           <LoadingSpinner />
         ) : fetchError ? (
           <div className="bg-red-900/20 rounded-lg p-4 text-red-400">
-            <p>Error: {fetchError}</p>
+            <p>Erreur : {fetchError}</p>
           </div>
         ) : filteredSuggestions.length > 0 ? (
           <SuggestionsList
@@ -130,7 +129,7 @@ export default function SuggestionsPage() {
           />
         ) : (
           <div className="p-8 text-center">
-            <p className="text-gray-300">No suggestions found.</p>
+            <p className="text-gray-300">Aucune suggestion trouvée.</p>
           </div>
         )}
       </main>

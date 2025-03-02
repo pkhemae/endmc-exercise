@@ -16,48 +16,40 @@ export default function Dashboard() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [openDropdownId, setOpenDropdownId] = useState<number | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const dropdownRef = useRef<{ [key: number]: HTMLDivElement | null }>({});
   
-  // Use a ref to track if we need to refresh
   const needsRefresh = useRef(false);
 
-  // Load user data once
   useEffect(() => {
     getCurrentUser();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
-  // Load suggestions when user changes or when modal closes
   useEffect(() => {
-    // Skip if no user
     if (!user) return;
     
-    // Function to load suggestions
     const loadSuggestions = async () => {
       try {
-        console.log("Fetching all suggestions");
+        setIsRefreshing(true);
         const allResult = await fetchSuggestions();
         if (allResult) {
-          // Filter suggestions by user ID
           const filtered = allResult.suggestions.filter((s: Suggestion) => 
-            s.user_id === 2 // Hardcoded to match your database
+            s.user_id === 2
           );
-          console.log("Filtered suggestions:", filtered);
           setUserSuggestions(filtered);
         }
       } catch (err) {
-        console.error("Error fetching suggestions:", err);
-        setFetchError("Failed to fetch suggestions");
+        console.error('Erreur lors du chargement des suggestions:', err);
+        setFetchError('Impossible de charger les suggestions');
+      } finally {
+        setIsRefreshing(false);
       }
     };
 
-    // Load suggestions
     loadSuggestions();
-    
-    // Reset the refresh flag
     needsRefresh.current = false;
   }, [user, isModalOpen, fetchSuggestions]);
 
-  // Add this effect after your other useEffects
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (openDropdownId !== null && 
@@ -80,22 +72,20 @@ export default function Dashboard() {
   const handleModalClose = () => {
     setIsModalOpen(false);
     
-    // Instead of using setTimeout and forcing a re-render, directly refresh
     if (user) {
       const loadSuggestions = async () => {
         try {
-          console.log("Refreshing suggestions after modal close");
+          console.log('Actualisation des suggestions après fermeture');
           const allResult = await fetchSuggestions();
           if (allResult) {
-            // Filter suggestions by user ID
             const filtered = allResult.suggestions.filter((s: Suggestion) => 
-              s.user_id === 2 // Hardcoded to match your database
+              s.user_id === 2
             );
             setUserSuggestions(filtered);
           }
         } catch (err) {
-          console.error("Error fetching suggestions:", err);
-          setFetchError("Failed to fetch suggestions");
+          console.error('Erreur lors du chargement des suggestions:', err);
+          setFetchError('Impossible de charger les suggestions');
         }
       };
       
@@ -105,7 +95,6 @@ export default function Dashboard() {
   
   const handleDeleteSuggestion = async (suggestionId: number) => {
     try {
-      // Remove the actionLoadingId state since it's not being used in the UI
       const success = await deleteSuggestion(suggestionId);
       if (success) {
         setUserSuggestions(prev => prev.filter(s => s.id !== suggestionId));
@@ -159,17 +148,17 @@ export default function Dashboard() {
             className="inline-flex items-center gap-2 mb-4 bg-[#252525] rounded-xl px-4 py-2 hover:border-gray-600 border border-gray-700 active:scale-95 transform transition-transform duration-150"
             aria-label="Ajouter une suggestion"
           >
-            <span className="font-medium text-white text-base">Mes suggestions</span>
+            <span className="font-medium text-white text-base">Ajouter une suggestion</span>
             <Plus className="h-4 w-4 text-white/70" />
           </button>
           
-          {isLoading ? (
+          {isLoading && !isRefreshing ? (
             <div className="flex justify-center items-center h-40">
               <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-orange-500"></div>
             </div>
           ) : fetchError ? (
             <div className="bg-red-900/20 rounded-lg p-4 text-red-400">
-              <p>Error: {fetchError}</p>
+              <p>Erreur : {fetchError}</p>
             </div>
           ) : userSuggestions.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -187,7 +176,7 @@ export default function Dashboard() {
             <div className="p-8 text-center">
               <div className="flex flex-col items-center justify-center">
                 <X className="h-32 w-32 text-red-500 mb-4 stroke-[1.5]" />
-                <p className="text-gray-300">Vous n&apos;avez pas encore crée de suggestion.</p>
+                <p className="text-gray-300">Vous n&apos;avez pas encore créé de suggestion.</p>
               </div>
             </div>
           )}

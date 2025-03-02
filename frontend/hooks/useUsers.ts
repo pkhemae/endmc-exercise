@@ -14,7 +14,6 @@ export function useUsers() {
   const [error, setError] = useState<string | null>(null);
 
   const fetchUser = async (userId: number): Promise<User | null> => {
-    // If we already have this user, return from cache
     if (users[userId]) {
       return users[userId];
     }
@@ -37,7 +36,6 @@ export function useUsers() {
 
       const userData: User = await response.json();
       
-      // Update the users cache
       setUsers(prev => ({
         ...prev,
         [userId]: userData
@@ -56,7 +54,6 @@ export function useUsers() {
     const user = await fetchUser(userId);
     if (!user) return null;
     
-    // Return full name if available, otherwise username
     return user.full_name || user.username || `User #${userId}`;
   };
 

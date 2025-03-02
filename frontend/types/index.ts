@@ -11,7 +11,7 @@ export interface RegisterData {
 }
 
 export interface User {
-  id?: number; // Add this line if it doesn't exist
+  id?: number;
   username: string;
   email: string;
   full_name: string;
